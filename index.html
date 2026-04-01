@@ -1,240 +1,159 @@
-Index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission: Finance Man — Sartorial Alignment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OPERATION: SWEENEY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', 'Helvetica Neue', sans-serif; background: #001f3f; color: white; text-align: center; margin: 0; padding: 20px; }
+        :root { --gold: #d4af37; --bg: #0a0a0a; --red: #ff4136; --gunmetal: #222; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; text-align: center; }
         .hidden { display: none !important; }
-        .screen { border: 2px solid #0074D9; padding: 20px; border-radius: 12px; max-width: 800px; margin: 20px auto; background: rgba(0, 43, 89, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h1, h2 { text-transform: uppercase; letter-spacing: 1px; color: #7FDBFF; }
-        p { line-height: 1.6; }
-        button { background: #0074D9; color: white; border: none; padding: 12px 24px; cursor: pointer; margin-top: 20px; font-size: 18px; border-radius: 8px; transition: background 0.2s; font-weight: bold; }
-        button:hover { background: #7FDBFF; color: #001f3f; }
-        input[type="password"] { padding: 12px; font-size: 16px; border-radius: 8px; border: 1px solid #7FDBFF; background: #001f3f; color: white; width: 80%; max-width: 300px; margin-top: 10px; }
-        .celebration { font-size: 28px; color: #FFDC00; font-weight: bold; margin: 20px 0; text-shadow: 1px 1px 2px #000; }
         
-        /* Dress Up Specifics */
-        #dressUpArea { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
-        #drop-zone-container { position: relative; width: 300px; height: 500px; border: 2px dashed #7FDBFF; border-radius: 10px; overflow: hidden; background: #001a33; display: flex; justify-content: center; align-items: center;}
-        #character-body { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; } /* Replace with your base body image URL */
-        .dress-items { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; max-width: 400px; }
-        .draggable-item { width: 100px; height: 100px; object-fit: contain; cursor: grab; border: 2px solid #ccc; border-radius: 8px; background: #fff; padding: 5px; transition: transform 0.2s; }
-        .draggable-item:active { cursor: grabbing; transform: scale(1.05); }
-        .drop-target { position: absolute; border: 2px solid transparent; } /* Hidden targets, shown when correct piece is dropped */
-        .snapped-piece { position: absolute; pointer-events: none; border: 3px solid #2ECC40 !important; border-radius: 8px; box-shadow: 0 0 10px rgba(46, 204, 64, 0.7); }
+        /* Mission Screens */
+        .screen { 
+            border: 1px solid #333; padding: 20px; width: 100%; max-width: 500px; margin: 20px auto; 
+            background: black; box-shadow: 0 0 20px rgba(212, 175, 55, 0.15); border-radius: 4px;
+        }
+        h1 { font-family: 'Special Elite', cursive; color: var(--gold); text-transform: uppercase; font-size: 1.5rem; margin: 10px 0; }
+        h2 { font-size: 10px; letter-spacing: 3px; color: #666; text-transform: uppercase; margin-bottom: 20px; }
+        p { color: #888; line-height: 1.5; font-size: 13px; }
+        
+        input { background: #111; border: 1px solid #444; color: var(--gold); padding: 12px; width: 100%; text-align: center; font-family: 'Special Elite'; font-size: 18px; margin: 15px 0; border-radius: 0; appearance: none; }
+        button { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 12px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; width: 100%; margin-top: 10px; }
+        
+        /* Crossword Styling */
+        .crossword-grid { display: grid; grid-template-columns: repeat(7, 40px); gap: 4px; justify-content: center; margin: 20px 0; }
+        .cell { width: 40px; height: 40px; background: #111; border: 1px solid #333; color: var(--gold); font-family: 'Special Elite'; text-align: center; font-size: 20px; text-transform: uppercase; line-height: 40px; }
+        .cell.highlight { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        .clue-list { text-align: left; font-size: 12px; color: #ccc; margin-top: 15px; padding: 0 10px; }
+
+        /* Manufacturing */
+        .swatch { width: 70px; height: 70px; display: inline-block; margin: 10px; border: 1px solid #444; position: relative; }
+        .progress-container { width: 100%; background: #222; height: 8px; margin: 20px 0; border-radius: 4px; }
+        .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; border-radius: 4px; }
+
+        /* Dress Up (Tap to Equip) */
+        #suit-up-stage { position: relative; width: 280px; height: 400px; margin: 0 auto; background: #050505; border: 1px solid #222; overflow: hidden; }
+        #base-body { width: 100%; height: 100%; object-fit: contain; opacity: 0.6; }
+        .equip-item { width: 70px; height: 70px; border: 1px solid #333; margin: 5px; padding: 5px; background: #111; opacity: 0.5; transition: 0.3s; }
+        .equip-item.active { opacity: 1; border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .fitted-piece { position: absolute; pointer-events: none; transition: opacity 0.5s; opacity: 0; }
+        .fitted-piece.visible { opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div id="login" class="screen">
-        <h1 style="font-size: 2.5em; color: #FFDC00; margin-bottom: 0;">FINANCE MAN</h1>
-        <h2>SARTORIAL ALIGNMENT</h2>
-        <p>Finance Man has invited you to a special security challenge.<br>Please enter your special access credentials.</p>
-        <input type="password" id="pass" placeholder="Password...">
-        <br><button onclick="checkPass()">ENTER</button>
+    <div id="stage1" class="screen">
+        <h2>MI6 URGENT DISPATCH</h2>
+        <h1>Finance Man</h1>
+        <p>IDENTIFICATION REQUIRED TO ACCESS <br>CLASSIFIED GIFT LOGS.</p>
+        <input type="password" id="pass" placeholder="ACCESS CODE">
+        <button onclick="checkPass()">AUTHENTICATE</button>
     </div>
 
-    <div id="challenge1" class="screen hidden">
-        <h2>MISSION PARAMETER 1: TARGET ACQUISITION</h2>
-        <p>Complete the word grid puzzle. Locate the key targets:<br>
-        <small>Thom Sweeney, suit, jacket, shirt, dapper, Sascha, forty two, birthday, bespoke.</small></p>
-        <div style="border: 2px solid #7FDBFF; height: 200px; margin: 20px; line-height: 200px; color: #7FDBFF;"> IMG_0149.png </div>
-        <button onclick="nextChallenge(2)">TARGETS CONFIRMED</button>
-    </div>
-
-    <div id="challenge2" class="screen hidden">
-        <h2>MISSION PARAMETER 2: RESOURCE ALLOCATION</h2>
-        <p>A bespoke mission requires optimal materials.<br>Select the correct primary fabric:</p>
-        <div style="display: flex; justify-content: center; gap: 20px;">
-            <div class="swatch" style="background: #001f3f; width: 80px; height: 80px; border: 3px solid white; cursor: pointer; transition: transform 0.2s;" onclick="correctFabric()"></div> <div class="swatch" style="background: pink; width: 80px; height: 80px; border: 3px solid #FF4136; cursor: pointer;" onclick="wrongFabric('Bath Ducks')"></div> <div class="swatch" style="background: yellow; width: 80px; height: 80px; border: 3px solid #FF851B; cursor: pointer;" onclick="wrongFabric('Bananas')"></div> </div>
-        <div id="sewingArea" class="hidden" style="margin-top: 20px;">
-            <p style="font-weight: bold; color: #2ECC40;">PRIMARY SELECTION ACCEPTED.</p>
-            <p>A bespoke build must be assembled. INITIATE SEWING CYCLE.</p>
-            <button id="sewBtn" onclick="sew()">SOW! SOW! SOW!</button>
-            <div style="width: 100%; background: #ccc; border-radius: 5px; margin-top: 15px; height: 20px;"><div id="progress-bar" style="width: 0%; height: 100%; background: #2ECC40; border-radius: 5px; transition: width 0.1s;"></div></div>
-        </div>
-    </div>
-
-    <div id="challenge3" class="screen hidden">
-        <h2>MISSION PARAMETER 3: FINAL ALIGNMENT</h2>
-        <p>Align the optimal suit pieces to prepare Finance Man for his reveal.</p>
+    <div id="stage2" class="screen hidden">
+        <h2>Mission Intel</h2>
+        <h1>Decryption Grid</h1>
+        <p>Enter the components to reveal the 7-letter extraction code.</p>
         
-        <div id="dressUpArea">
-            <div id="drop-zone-container">
-                <img src="https://img.icons8.com/color/1600/null/man.png" id="character-body" alt="Character Base">
-                
-                <div id="target-jacket" class="drop-target" style="top: 15%; left: 30%; width: 40%; height: 50%;"></div>
-                <div id="target-trousers" class="drop-target" style="top: 55%; left: 35%; width: 30%; height: 40%;"></div>
-                <div id="target-shirt" class="drop-target" style="top: 10%; left: 35%; width: 30%; height: 25%;"></div>
-            </div>
-
-            <div class="dress-items">
-                <img src="https://img.icons8.com/color/160/null/suit.png" id="item-jacket" class="draggable-item" draggable="true" ondragstart="drag(event)">
-                <img src="https://img.icons8.com/color/160/null/jeans.png" id="item-trousers" class="draggable-item" draggable="true" ondragstart="drag(event)">
-                <img src="https://img.icons8.com/color/160/null/shirt.png" id="item-shirt" class="draggable-item" draggable="true" ondragstart="drag(event)">
-                
-                <img src="https://img.icons8.com/color/160/null/banana.png" id="item-banana" class="draggable-item" draggable="true" ondragstart="drag(event)">
-                <img src="https://img.icons8.com/color/160/null/shoes.png" id="item-clown-shoes" class="draggable-item" draggable="true" ondragstart="drag(event)">
-            </div>
+        <div class="crossword-grid">
+            <input id="c1" maxlength="1" class="cell highlight" placeholder="B">
+            <input id="c2" maxlength="1" class="cell highlight" placeholder="E">
+            <input id="c3" maxlength="1" class="cell highlight" placeholder="S">
+            <input id="c4" maxlength="1" class="cell highlight" placeholder="P">
+            <input id="c5" maxlength="1" class="cell highlight" placeholder="O">
+            <input id="c6" maxlength="1" class="cell highlight" placeholder="K">
+            <input id="c7" maxlength="1" class="cell highlight" placeholder="E">
         </div>
-        <p id="feedback-message" style="color: #FFDC00; font-weight: bold; min-height: 24px;"></p>
+        
+        <div class="clue-list">
+            1. The ultimate tailoring style (7 letters).<br>
+            <i>Hint: It's what the gift is! B _ _ _ _ _ E</i>
+        </div>
+
+        <input type="text" id="codeword" placeholder="ENTER REVEALED CODE">
+        <button onclick="checkCode()">VERIFY INTEL</button>
     </div>
 
-    <div id="final" class="screen hidden">
-        <h1 class="celebration">MISSION ACCOMPLISHED.<br>FINANCE MAN THANKS YOU!</h1>
-        <video width="100%" controls autoplay style="border: 4px solid #7FDBFF; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.7);">
-            <source src="gemini_generated_video_958E6D40.mp4" type="video/mp4">
-            Your browser does not support the video tag.
+    <div id="stage3" class="screen hidden">
+        <h2>Q-Workshop</h2>
+        <h1>Material Assembly</h1>
+        <p>Tap the Midnight Navy swatch to begin manufacture.</p>
+        <div class="swatch" style="background:#001f3f;" onclick="startSew()"></div>
+        <div class="swatch" style="background:#ff69b4;" onclick="alert('Inconspicuous fail.')"></div>
+        
+        <div id="sew-zone" class="hidden">
+            <button onclick="doSew()" style="height: 60px;">TAP TO STITCH</button>
+            <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+        </div>
+    </div>
+
+    <div id="stage4" class="screen hidden">
+        <h2>Deployment</h2>
+        <h1>Final Alignment</h1>
+        <p>Tap the gear to equip Finance Man.</p>
+        
+        <div id="suit-up-stage">
+            <img src="body.png" id="base-body">
+            <img src="jacket.png" id="fit-jacket" class="fitted-piece" style="top:15%; left:20%; width:60%;">
+            <img src="trousers.png" id="fit-trousers" class="fitted-piece" style="top:50%; left:25%; width:50%;">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <img src="jacket.png" class="equip-item" onclick="equip('jacket', this)">
+            <img src="trousers.png" class="equip-item" onclick="equip('trousers', this)">
+            <img src="https://img.icons8.com/color/96/banana.png" class="equip-item" onclick="alert('Tactical error.')">
+        </div>
+        
+        <button id="final-btn" class="hidden" onclick="next(5)">INITIATE EXTRACTION</button>
+    </div>
+
+    <div id="stage5" class="screen hidden">
+        <h1>Mission Success</h1>
+        <video width="100%" controls playsinline autoplay style="border: 1px solid var(--gold);">
+            <source src="reveal.mp4" type="video/mp4">
         </video>
-        <p>🎉🎉🎉 The gift is magnificent! 🎉🎉🎉</p>
+        <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">
+            "THE ARMOR IS SPECTACULAR. THANK YOU."
+        </p>
     </div>
 
     <script>
-        // CORE NAVIGATION & LOGIC
-        function checkPass() {
-            if(document.getElementById('pass').value.toLowerCase() === 'birthdaypresent') {
-                nextChallenge(1);
-            } else { alert('❌ ERROR: Access Denied. Verify Mission Credentials.'); }
-        }
-
-        function nextChallenge(n) {
+        function next(n) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('challenge' + n).classList.remove('hidden');
+            document.getElementById('stage' + n).classList.remove('hidden');
         }
 
-        // CHALLENGE 2: SEWING & FABRIC
-        function correctFabric() {
-            alert('PERFECT CHOICE. Analyzing texture... ACCEPTED.');
-            document.getElementById('sewingArea').classList.remove('hidden');
+        function checkPass() {
+            if(document.getElementById('pass').value.toLowerCase() === 'birthdaypresent') next(2);
+            else alert('ACCESS DENIED');
         }
-        function wrongFabric(item) { alert('❌ WRONG! '+item+' are not optimal mission parameters. Selection Rejected.'); }
 
-        let progress = 0;
-        let lastSewTime = 0;
-        function sew() {
-            const now = Date.now();
-            if (now - lastSewTime < 100) return; // Basic rate limiting
-            lastSewTime = now;
-            progress += 5;
-            document.getElementById('progress-bar').style.width = progress + '%';
-            if(progress >= 100) {
-                alert('Congratulations! Build Assembled.');
-                nextChallenge(3);
-                initializeDragAndDrop();
+        function checkCode() {
+            if(document.getElementById('codeword').value.toLowerCase() === 'bespoke') next(3);
+            else alert('CODE INVALID');
+        }
+
+        function startSew() { document.getElementById('sew-zone').classList.remove('hidden'); }
+        
+        let p = 0;
+        function doSew() {
+            p += 10;
+            document.getElementById('progress-bar').style.width = p + '%';
+            if(p >= 100) setTimeout(() => next(4), 500);
+        }
+
+        let equipped = 0;
+        function equip(part, el) {
+            if(!el.classList.contains('active')) {
+                document.getElementById('fit-' + part).classList.add('visible');
+                el.classList.add('active');
+                equipped++;
+                if(equipped === 2) document.getElementById('final-btn').classList.remove('hidden');
             }
         }
-
-        // CHALLENGE 3: DRESS-UP & SNAPPING LOGIC
-        let snappedPieces = 0;
-        const totalPieces = 3; // Jacket, Trousers, Shirt
-
-        // Need this list to identify silly items easily
-        const sillyItems = ['item-banana', 'item-clown-shoes'];
-
-        // Map correct item IDs to their snap targets
-        const snapMap = {
-            'item-jacket': 'target-jacket',
-            'item-trousers': 'target-trousers',
-            'item-shirt': 'target-shirt'
-        };
-
-        function initializeDragAndDrop() {
-            const dropZone = document.getElementById('drop-zone-container');
-            dropZone.ondragover = function(event) { event.preventDefault(); }; // Allow dropping
-            dropZone.ondrop = handleDrop;
-        }
-
-        function drag(event) {
-            event.dataTransfer.setData("text", event.target.id);
-        }
-
-        function handleDrop(event) {
-            event.preventDefault();
-            const itemId = event.dataTransfer.getData("text");
-            const draggedItem = document.getElementById(itemId);
-            const feedback = document.getElementById('feedback-message');
-            
-            feedback.textContent = ""; // Clear old message
-
-            // 1. Check if the item is silly
-            if (sillyItems.includes(itemId)) {
-                wrongItem(itemId);
-                return;
-            }
-
-            // 2. Determine if the correct item has a matching target
-            const targetId = snapMap[itemId];
-            if (!targetId) return; // Should not happen with current logic
-
-            // Check if this item is already snapped
-            if (draggedItem.classList.contains('snapped-piece')) {
-                feedback.textContent = "That piece is already secure!";
-                return;
-            }
-
-            // 3. Perform the snap!
-            snapPiece(draggedItem, targetId);
-        }
-
-        function snapPiece(item, targetId) {
-            const target = document.getElementById(targetId);
-            const container = document.getElementById('drop-zone-container');
-            const feedback = document.getElementById('feedback-message');
-
-            // Hide the original item from the palette
-            item.style.display = 'none';
-
-            // Create a clone to represent the snapped piece
-            const clone = item.cloneNode(true);
-            clone.removeAttribute('id'); // Prevent duplicate IDs
-            clone.removeAttribute('draggable');
-            clone.classList.remove('draggable-item');
-            clone.classList.add('snapped-piece');
-
-            // Copy style attributes from the target drop zone to position the snap exactly
-            clone.style.top = target.style.top;
-            clone.style.left = target.style.left;
-            clone.style.width = target.style.width;
-            clone.style.height = target.style.height;
-
-            // Add the snapped piece to the character container
-            container.appendChild(clone);
-            
-            // Increment completed count and provide positive feedback
-            snappedPieces++;
-            feedback.textContent = "✅ " + item.id.split('-')[1].toUpperCase() + " SECURED. ALIGNMENT CONFIRMED.";
-            feedback.style.color = "#2ECC40";
-
-            // Check for game completion
-            if (snappedPieces === totalPieces) {
-                setTimeout(finishMission, 1000); // Small delay for the final fanfare
-            }
-        }
-
-        function wrongItem(itemId) {
-            const feedback = document.getElementById('feedback-message');
-            feedback.style.color = "#FF4136";
-            if (itemId === 'item-banana') {
-                feedback.textContent = "❌ ERROR: Bananas are not appropriate formal attire!";
-            } else if (itemId === 'item-clown-shoes') {
-                feedback.textContent = "❌ ERROR: Clown shoe detection! Mission Protocol compromised.";
-            } else {
-                feedback.textContent = "❌ ERROR: Material parameter misalignment.";
-            }
-        }
-
-        function finishMission() {
-            nextChallenge('final');
-            const audio = new Audio('https://www.soundjay.com/misc/sounds/fanfare-01.mp3');
-            audio.play().catch(e => {
-                console.log("Audio autoplay was prevented. User must interact first.");
-                // Provide a backup 'Finish Mission' button if audio fails.
-            });
-        }
-
     </script>
 </body>
 </html>
