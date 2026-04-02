@@ -8,49 +8,47 @@
     <style>
         :root { --gold: #D4AF37; --bg: #0a0a0a; --red: #E63946; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; text-align: center; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; text-align: center; }
         .hidden { display: none !important; }
         
         .screen { border: 1px solid #333; padding: 20px; width: 100%; max-width: 600px; margin: 10px auto; background: black; border-radius: 4px; }
-        h1 { font-family: 'Special Elite', cursive; color: var(--gold); text-transform: uppercase; font-size: 1.5rem; margin: 10px 0; }
+        h1 { font-family: 'Special Elite', cursive; color: var(--gold); text-transform: uppercase; font-size: 1.4rem; margin: 10px 0; }
         h2 { font-size: 10px; letter-spacing: 3px; color: #888; text-transform: uppercase; margin-bottom: 15px; }
         p { color: #aaa; font-size: 13px; line-height: 1.5; }
         
-        input.password { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; width: 100%; text-align: center; font-family: 'Special Elite'; font-size: 18px; margin: 15px 0; outline: none; }
-        button { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; width: 100%; font-weight: bold; margin-top: 10px; }
+        input.password { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; width: 100%; text-align: center; font-family: 'Special Elite'; font-size: 18px; margin: 15px 0; outline: none; border-radius: 0; -webkit-appearance: none; }
+        
+        button { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; width: 100%; font-weight: bold; margin-top: 10px; border-radius: 4px; }
         button:hover { background: var(--gold); color: black; }
+        .btn-success { background: #2ECC40; color: white; border: none; font-size: 16px; margin-bottom: 15px; }
 
-        /* REAL CROSSWORD GRID */
-        .cw-container { width: 100%; overflow-x: auto; padding: 10px 0; margin-bottom: 20px; }
-        .cw-grid { display: grid; grid-template-columns: repeat(12, 28px); grid-template-rows: repeat(11, 28px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
-        .cw-cell { position: relative; background: #fff; width: 28px; height: 28px; }
-        .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; }
-        .cw-cell input:focus { background: #fff3cd; outline: none; }
+        /* THE CROSSWORD */
+        .cw-container { width: 100%; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
+        .cw-grid { display: grid; grid-template-columns: repeat(12, 26px); grid-template-rows: repeat(11, 26px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
+        .cw-cell { position: relative; background-color: #ffffff !important; width: 26px; height: 26px; border: 1px solid #999; }
+        .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; padding: 0; color: #000000 !important; background-color: #ffffff !important; -webkit-appearance: none; border-radius: 0; opacity: 1; }
+        .cw-cell input:focus { background-color: #fff3cd !important; outline: none; }
         .cw-num { position: absolute; top: 1px; left: 2px; font-size: 8px; font-weight: bold; color: #000; z-index: 2; pointer-events: none; }
         
-        .clues { text-align: left; font-size: 12px; color: #ccc; display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; }
-        .clue-col { width: 48%; }
-        .clue-col h3 { color: var(--gold); font-size: 14px; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;}
-        .clue-col p { margin: 5px 0; font-size: 11px; }
+        .clues { text-align: left; font-size: 12px; color: #ccc; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; }
+        .clues h3 { color: var(--gold); font-size: 14px; margin-bottom: 5px; margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+        .clues p { margin: 6px 0; font-size: 12px; line-height: 1.4; }
 
         /* MANUFACTURING */
         .swatch-group { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
         .swatch { width: 80px; height: 80px; border: 2px solid #444; cursor: pointer; background-size: cover; background-position: center; border-radius: 4px; }
-        .swatch:active { transform: scale(0.9); }
+        .swatch:active { transform: scale(0.9); border-color: var(--gold); }
         .progress-container { width: 100%; background: #222; height: 15px; margin: 15px 0; border-radius: 8px; overflow: hidden;}
-        .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.2s; }
+        .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
 
         /* SUIT UP */
-        #suit-up-stage { position: relative; width: 280px; height: 400px; margin: 0 auto; background: #111; border: 1px solid #333; overflow: hidden; }
+        #suit-up-stage { position: relative; width: 260px; height: 380px; margin: 0 auto; background: #111; border: 1px solid #333; overflow: hidden; border-radius: 8px; }
         #suit-up-stage img { position: absolute; width: 100%; height: 100%; object-fit: contain; top: 0; left: 0; }
-        .fitted { opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .fitted { opacity: 0; transition: opacity 0.5s ease-in-out; pointer-events: none; }
         .fitted.visible { opacity: 1; }
-        .inventory { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-        .inv-item { width: 65px; height: 65px; border: 1px solid #444; background: #000; cursor: pointer; object-fit: cover; }
-        .inv-item.used { border-color: var(--gold); opacity: 0.5; pointer-events: none; }
-
-        /* VIDEO */
-        video { border: 2px solid var(--gold); background: #000; }
+        .inventory { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
+        .inv-item { width: 60px; height: 60px; border: 1px solid #444; background: #000; cursor: pointer; object-fit: cover; border-radius: 4px; }
+        .inv-item.used { border-color: var(--gold); opacity: 0.3; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -68,28 +66,24 @@
         <h2>DECRYPTION MATRIX</h2>
         <h1>Recover Spec Grid</h1>
         <div class="cw-container">
-            <div id="cw-grid" class="cw-grid">
-                </div>
+            <div id="cw-grid" class="cw-grid"></div>
         </div>
         
         <div class="clues">
-            <div class="clue-col">
-                <h3>ACROSS</h3>
-                <p><b>10.</b> Another trip around the sun</p>
-                <p><b>12.</b> Dark blue or where admirals go to work</p>
-                <p><b>14.</b> Sheep-derived fabric often used in suits</p>
-                <p><b>28.</b> Secret password and location of HQ</p>
-            </div>
-            <div class="clue-col">
-                <h3>DOWN</h3>
-                <p><b>1.</b> Neckwear - or a draw on the scoreboard</p>
-                <p><b>3.</b> Custom-made; or what bees did when they told you something</p>
-                <p><b>5.</b> Swirly pattern often used for stylish jacket linings</p>
-                <p><b>16.</b> Art of making clothes fit perfectly</p>
-                <p><b>31.</b> Corporate uniform or legal action</p>
-            </div>
+            <h3>ACROSS</h3>
+            <p><b>10.</b> Another trip around the sun</p>
+            <p><b>12.</b> Dark blue or where admirals go to work</p>
+            <p><b>14.</b> Sheep-derived fabric often used in suits</p>
+            <p><b>28.</b> Secret password and location of HQ</p>
+            
+            <h3>DOWN</h3>
+            <p><b>1.</b> Neckwear - or a draw on the scoreboard</p>
+            <p><b>3.</b> Custom-made; or what bees did when they told you something</p>
+            <p><b>5.</b> Swirly pattern often used for stylish jacket linings</p>
+            <p><b>16.</b> Art of making clothes fit perfectly</p>
+            <p><b>31.</b> Corporate uniform or legal action</p>
         </div>
-        <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 15px; height: 15px;"></p>
+        <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 15px; min-height: 15px;"></p>
         <button onclick="verifyCrossword()">VERIFY DECRYPTION</button>
     </div>
 
@@ -99,15 +93,16 @@
         <p>Select the optimal textile.</p>
         
         <div class="swatch-group">
-            <div class="swatch" style="background-image: url('IMG_0146.jpeg')" onclick="alert('REJECTED: Tartan is too conspicuous.')"></div>
+            <div class="swatch" style="background-image: url('IMG_0146.jpeg')" onclick="alert('REJECTED: Tartan is too conspicuous for stealth.')"></div>
             <div class="swatch" style="background-image: url('IMG_0145.jpeg')" onclick="startSewing()"></div>
-            <div class="swatch" style="background-image: url('IMG_0147.webp')" onclick="alert('REJECTED: Rubber ducks pose a security risk.')"></div>
+            <div class="swatch" style="background-image: url('IMG_0147.webp')" onclick="alert('REJECTED: Rubber ducks pose a severe security risk.')"></div>
         </div>
 
         <div id="sew-zone" class="hidden" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
             <p style="color: var(--gold); font-weight: bold;">NAVY TEXTILE CONFIRMED.</p>
-            <img src="IMG_0156.gif" style="width: 100%; max-width: 200px; border: 1px solid #444; border-radius: 4px;">
-            <p>Rapidly tap to initiate tailoring sequences.</p>
+            <img src="IMG_0156.gif" style="width: 100%; max-width: 200px; border: 1px solid #444; border-radius: 4px; margin-bottom: 10px;">
+            
+            <p id="sew-status" style="font-family: 'Special Elite'; font-size: 16px;">TAP RAPIDLY TO STITCH</p>
             <button onclick="doSew()">MASH TO SEW</button>
             <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         </div>
@@ -116,43 +111,39 @@
     <div id="stage4" class="screen hidden">
         <h2>DEPLOYMENT</h2>
         <h1>Equip Asset</h1>
+        
+        <button id="final-btn" class="hidden btn-success" onclick="next(5)">FINALIZE DEPLOYMENT</button>
+        
         <p>Tap the correct tactical gear to dress Finance Man.</p>
         
         <div id="suit-up-stage">
             <img src="IMG_0151.png" id="char-body">
-            <img src="IMG_0155.png" id="fit-trousers" class="fitted">
-            <img src="IMG_0154.png" id="fit-jacket" class="fitted">
+            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:45%; left:20%; width:60%;">
+            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:12%; left:15%; width:70%;">
         </div>
 
         <div class="inventory">
             <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)">
             <img src="IMG_0142.jpeg" class="inv-item" onclick="alert('ERROR: Bananas are for eating, not wearing.')">
-            <img src="IMG_0143.jpeg" class="inv-item" onclick="alert('ERROR: Clown pants compromise stealth.')">
+            <img src="IMG_0143.jpeg" class="inv-item" onclick="alert('ERROR: Clown pants severely compromise stealth.')">
             <img src="IMG_0144.jpeg" class="inv-item" onclick="alert('ERROR: Armor is too heavy for modern espionage.')">
+            <img src="https://img.icons8.com/color/96/top-hat.png" class="inv-item" onclick="alert('ERROR: A top hat is too formal for this operation.')">
+            <img src="https://img.icons8.com/color/96/swimming-flippers.png" class="inv-item" onclick="alert('ERROR: Flippers impede foot pursuit.')">
         </div>
-
-        <button id="final-btn" class="hidden" onclick="next(5)">FINALIZE DEPLOYMENT</button>
     </div>
 
     <div id="stage5" class="screen hidden">
         <h2>MISSION ACCOMPLISHED</h2>
         <h1>Extraction Success</h1>
         
-        <div id="pre-video">
-            <img src="IMG_6503.png" style="width: 100%; border: 1px solid var(--gold); margin-bottom: 15px; border-radius: 4px;">
-            <p style="color: var(--gold); font-family: 'Special Elite';">ASSET IS SECURE AND LOOKING DAPPER.</p>
-            <button onclick="playReveal()">PLAY FINAL TRANSMISSION</button>
-        </div>
-
-        <div id="video-container" class="hidden">
-            <video id="revealVideo" width="100%" playsinline controls>
-                <source src="gemini_generated_video_958E6D40.mp4" type="video/mp4">
-            </video>
-            <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">
-                "THANK YOU FOR THE INCREDIBLE GIFT!"
-            </p>
-        </div>
+        <video id="revealVideo" width="100%" playsinline controls style="border: 2px solid var(--gold); border-radius: 4px; background: #000;">
+            <source src="gemini_generated_video_958E6D40.mp4" type="video/mp4">
+        </video>
+        
+        <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold); font-size: 16px;">
+            "THE ARMOR IS SPECTACULAR. THANK YOU FOR THE INCREDIBLE GIFT!"
+        </p>
     </div>
 
     <script>
@@ -165,11 +156,16 @@
         function next(n) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('stage' + n).classList.remove('hidden');
+            
             if(n === 2 && !gridBuilt) buildGrid();
+            
+            if(n === 5) {
+                // Auto-play the video when entering stage 5
+                document.getElementById('revealVideo').play();
+            }
         }
 
         // --- THE CROSSWORD LOGIC ---
-        // Maps the exact layout from the PDF image uploaded
         const cwData = [
             {c:7, r:1, l:'B', n:3}, {c:7, r:2, l:'E'}, {c:10, r:2, l:'P', n:5},
             {c:3, r:3, l:'T', n:16}, {c:7, r:3, l:'S'}, {c:9, r:3, l:'N', n:12}, {c:10, r:3, l:'A'}, {c:11, r:3, l:'V'}, {c:12, r:3, l:'Y'},
@@ -194,7 +190,7 @@
                 
                 let input = document.createElement('input');
                 input.maxLength = 1;
-                input.dataset.ans = cell.l; // Stores correct letter
+                input.dataset.ans = cell.l; 
                 
                 if(cell.n) {
                     let num = document.createElement('span');
@@ -215,7 +211,7 @@
             inputs.forEach(input => {
                 if(input.value.toUpperCase() !== input.dataset.ans) {
                     correct = false;
-                    input.style.color = "red";
+                    input.style.color = "var(--red)";
                 } else {
                     input.style.color = "black";
                 }
@@ -225,7 +221,7 @@
                 document.getElementById('cw-error').innerText = "";
                 next(3);
             } else {
-                document.getElementById('cw-error').innerText = "ERROR: Incorrect specs detected.";
+                document.getElementById('cw-error').innerText = "ERROR: Incorrect specs detected. Check red letters.";
             }
         }
 
@@ -234,26 +230,34 @@
         
         let p = 0;
         function doSew() {
+            if (p >= 100) return;
             p += 15;
-            document.getElementById('progress-bar').style.width = p + '%';
-            if(p >= 100) setTimeout(() => next(4), 500);
+            
+            let status = document.getElementById('sew-status');
+            if (p < 100) {
+                status.innerText = "KEEP GOING...";
+                status.style.color = "var(--gold)";
+            }
+            
+            // Mathematically cap the width at 100% so it doesn't break the frame
+            document.getElementById('progress-bar').style.width = Math.min(p, 100) + '%';
+            
+            if(p >= 100) {
+                status.innerText = "WELL DONE!";
+                status.style.color = "#2ECC40"; // Bright Green
+                setTimeout(() => next(4), 1000);
+            }
         }
 
         // --- SUIT UP ---
         let gearCount = 0;
         function equip(part, el) {
-            document.getElementById('fit-' + part).classList.add('visible');
-            el.classList.add('used');
-            gearCount++;
-            if(gearCount >= 2) document.getElementById('final-btn').classList.remove('hidden');
-        }
-
-        // --- FINAL VIDEO ---
-        function playReveal() {
-            document.getElementById('pre-video').classList.add('hidden');
-            document.getElementById('video-container').classList.remove('hidden');
-            let vid = document.getElementById('revealVideo');
-            vid.play();
+            if(!el.classList.contains('used')) {
+                document.getElementById('fit-' + part).classList.add('visible');
+                el.classList.add('used');
+                gearCount++;
+                if(gearCount >= 2) document.getElementById('final-btn').classList.remove('hidden');
+            }
         }
     </script>
 </body>
