@@ -129,12 +129,11 @@
         </div>
 
         <div class="inventory">
-            <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)">
-            <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)">
-            
             <img src="IMG_6516.png" class="inv-item" onclick="alert('ERROR: Finance Man is not going for the off-duty Midtown tech-bro look today.')">
             <img src="IMG_0142.jpeg" class="inv-item" onclick="alert('SECURITY ERROR: Potassium levels too high. Bananas are not tactical gear.')">
+            <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)">
             <img src="IMG_0143.jpeg" class="inv-item" onclick="alert('ERROR: Clown pants severely compromise stealth capabilities.')">
+            <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)">            
             <img src="IMG_0144.jpeg" class="inv-item" onclick="alert('ERROR: Medieval armor is too heavy for modern espionage.')">
         </div>
 
@@ -240,28 +239,37 @@
             gridBuilt = true;
         }
 
-        function verifyCrossword() {
+                function verifyCrossword() {
             let inputs = document.querySelectorAll('.cw-cell input');
-            let correct = true;
+            let is28Correct = true;
             
             inputs.forEach(input => {
+                let row = input.parentElement.style.gridRow;
+                
+                // Highlight incorrect letters
                 if(input.value.toUpperCase() !== input.dataset.ans) {
-                    correct = false;
-                    input.style.backgroundColor = "#ffcccc"; // Light red background
-                    input.style.color = "#cc0000"; // Dark red text
+                    input.style.backgroundColor = "#ffcccc"; 
+                    input.style.color = "#cc0000"; 
+                    
+                    // ONLY block progress if the mistake is in row 7 (Clue 28)
+                    if (row === "7") {
+                        is28Correct = false;
+                    }
                 } else {
+                    // Correct letters look normal
                     input.style.backgroundColor = "transparent";
                     input.style.color = "black";
                 }
             });
             
-            if(correct) {
+            if(is28Correct) {
                 document.getElementById('cw-error').innerText = "";
                 next(3);
             } else {
-                document.getElementById('cw-error').innerText = "ERROR: Incorrect specs detected.";
+                document.getElementById('cw-error').innerText = "ERROR: Clue 28-Across is incorrect or incomplete.";
             }
         }
+
 
         // --- MANUFACTURING ---
         function startSewing() { document.getElementById('sew-zone').classList.remove('hidden'); }
