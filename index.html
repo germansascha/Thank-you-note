@@ -91,8 +91,8 @@
         </div>
         
         <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 15px; height: 15px;"></p>
-        
-        <button onclick="alert('HINT: Where can you get the best suit in London? his first name sounds like Jerry's nemesis, his last name is the first name of the demon barber. (Two words, no spaces)')" style="background: transparent; border-color: #555; color: #aaa; margin-top: 15px; font-size: 12px; padding: 10px;">NEED A HINT FOR 28-ACROSS?</button>
+        <button onclick="document.getElementById('secret-hint').classList.remove('hidden')" style="background: transparent; border-color: #555; color: #aaa; margin-top: 15px; font-size: 12px; padding: 10px; transition: 0.3s;">REQUEST CLASSIFIED INTEL FOR 28-ACROSS</button>
+        <p id="secret-hint" class="hidden" style="color: var(--gold); font-size: 13px; margin-top: 10px; font-style: italic;">Q-Branch Intel: Where can you get the best suit in London? his first name sounds like Jerry's nemesis, his last name is the first name of the demon barber. (Two words, no spaces)</p>
         <button onclick="verifyCrossword()">VERIFY DECRYPTION</button>
     </div>
 
