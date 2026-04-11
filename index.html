@@ -24,7 +24,7 @@
 
         /* COMPACT CROSSWORD GRID */
         .cw-container { width: 100%; overflow-x: auto; padding: 10px 0; margin-bottom: 20px; }
-        .cw-grid { display: grid; grid-template-columns: repeat(15, 26px); grid-template-rows: repeat(11, 26px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
+        .cw-grid { display: grid; grid-template-columns: repeat(16, 26px); grid-template-rows: repeat(12, 26px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
         .cw-cell { position: relative; background: #fff; width: 26px; height: 26px; }
         .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; background: transparent; }
         .cw-num { position: absolute; top: 0px; left: 1px; font-size: 7px; font-weight: bold; color: #000; z-index: 2; pointer-events: none; }
@@ -75,8 +75,11 @@
     <div id="stage2" class="screen hidden">
         <h2>MISSION PARAMETERS</h2>
         <h1>Sartorial Decryption</h1>
-        <p style="color: var(--gold); font-weight: bold; margin-bottom: 15px; font-style: italic;">
-            "Finance Man needs your help to find his civilian disguise again. We need the password for the secret location to get a new one. It is part of this riddle!"
+        <p style="color: var(--gold); font-weight: bold; margin-bottom: 10px; font-style: italic;">
+            "Finance Man needs your help to find his civilian disguise. Solve the riddle to find the password for the secret location!"
+        </p>
+        <p style="color: white; font-size: 11px; background: var(--red); padding: 5px; border-radius: 3px; margin-bottom: 15px;">
+            CRITICAL: 28-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
         </p>
         
         <div class="cw-container">
@@ -88,7 +91,6 @@
                 <h3>ACROSS</h3>
                 <p><b>7.</b> Jacket fold</p>
                 <p><b>9.</b> Business attire</p>
-                <p><b>22.</b> Jacket interior</p>
                 <p><b>28.</b> THE SECRET PASSWORD</p>
                 <p><b>32.</b> Curvy fabric pattern</p>
             </div>
@@ -98,20 +100,18 @@
                 <p><b>11.</b> Famous London tailoring street</p>
                 <p><b>18.</b> Annual cake occasion</p>
                 <p><b>26.</b> Custom-made (what bees did)</p>
-                <p><b>31.</b> Expression of gratitude</p>
             </div>
         </div>
         
-        <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 11px; margin-top: 10px;"></p>
-        <button onclick="alert('HINT: Jerry\'s nemesis is Jerry... no, wait. Nemesis is Jerry\'s rival! Demon barber is Sweeney!')" style="background: transparent; border-color: #555; color: #aaa; margin-top: 10px; font-size: 11px;">HINT FOR 28-ACROSS?</button>
-        <button onclick="verifyCrossword()">VERIFY DECRYPTION</button>
+        <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 10px;"></p>
+        <button onclick="verifyCrossword()">VERIFY PASSWORD (28-ACROSS)</button>
     </div>
 
     <div id="stage3" class="screen hidden">
         <h2>DISGUISE MAKER FACILITIES</h2>
         <h1>Asset Reconstruction</h1>
         <p style="color: var(--gold); font-weight: bold; margin-bottom: 15px; font-style: italic;">
-            "You've successfully accessed the secret disguise maker facilities! Help us create the best one."
+            "You've successfully accessed the secret disguise maker facilities! Help us select and create the best one."
         </p>
         
         <div class="swatch-group">
@@ -134,13 +134,15 @@
         <div id="suit-up-stage">
             <img src="IMG_0151.png" id="char-body">
             <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:50%; left:20%; width:60%;">
-            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:6%; left:10%; width:80%;">
+            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:-2%; left:12%; width:76%;">
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)">
-            <img src="IMG_6516.png" class="inv-item" onclick="alert('REJECTED')">
+            <img src="IMG_6516.png" class="inv-item" onclick="alert('REJECTED: Finance Man is not going for the Midtown tech-bro look.')">
             <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)">
-            <img src="IMG_0142.jpeg" class="inv-item" onclick="alert('REJECTED')">
+            <img src="IMG_0142.jpeg" class="inv-item" onclick="alert('REJECTED: Potassium levels too high. Bananas are not tactical.')">
+            <img src="IMG_0143.jpeg" class="inv-item" onclick="alert('REJECTED: Stealth compromised.')">
+            <img src="IMG_0144.jpeg" class="inv-item" onclick="alert('REJECTED: Too heavy for modern espionage.')">
         </div>
         <button id="final-btn" class="hidden" onclick="next(5)">FINALIZE DEPLOYMENT</button>
     </div>
@@ -155,7 +157,7 @@
             <video id="revealVideo" width="100%" playsinline controls>
                 <source src="gemini_generated_video_958E6D40.mp4" type="video/mp4">
             </video>
-            <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">"THANK YOU FOR THE INCREDIBLE GIFT!"</p>
+            <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">"THANK YOU GILLIAN AND WAYNE FOR THE INCREDIBLE GIFT!"</p>
         </div>
     </div>
 
@@ -171,18 +173,30 @@
             else alert('ACCESS DENIED.');
         }
 
-        // --- COMPACT CROSSWORD GRID DATA (V3b) ---
+        // --- BULLETPROOF CROSSWORD GRID ---
         const cwData = [
-            // Across 7: LAPEL (Col 11, Row 3)
-            {c:11, r:3, l:'L', n:7}, {c:12, r:3, l:'A'}, {c:13, r:3, l:'P'}, {c:14, r:3, l:'E'}, {c:15, r:3, l:'L'},
-            // Across 28: THOMSWEENEY (Col 4, Row 7)
+            // Row 2: 9 Across (SUIT) & 11 Down start
+            {c:11, r:2, l:'S', n:9}, {c:12, r:2, l:'U'}, {c:13, r:2, l:'I'}, {c:14, r:2, l:'T'},
+            // Row 3: 3 Down start & 11 Down continues
+            {c:11, r:3, l:'A', n:11}, {c:13, r:3, l:'J', n:3},
+            // Row 4: 18 Down start & 7 Across (LAPEL)
+            {c:4, r:4, l:'B', n:18}, {c:11, r:4, l:'V'}, {c:12, r:4, l:'L', n:7}, {c:13, r:4, l:'A'}, {c:14, r:4, l:'P'}, {c:15, r:4, l:'E'}, {c:16, r:4, l:'L'},
+            // Row 5
+            {c:4, r:5, l:'I'}, {c:11, r:5, l:'I'}, {c:13, r:5, l:'C'},
+            // Row 6: 26 Down start
+            {c:4, r:6, l:'R'}, {c:10, r:6, l:'B', n:26}, {c:11, r:6, l:'L'}, {c:13, r:6, l:'K'},
+            // Row 7: 28 Across (THOMSWEENEY) - THE PASSWORD ROW
             {c:4, r:7, l:'T', n:28}, {c:5, r:7, l:'H'}, {c:6, r:7, l:'O'}, {c:7, r:7, l:'M'}, {c:8, r:7, l:'S'}, {c:9, r:7, l:'W'}, {c:10, r:7, l:'E'}, {c:11, r:7, l:'E'}, {c:12, r:7, l:'N'}, {c:13, r:7, l:'E'}, {c:14, r:7, l:'Y'},
-            // Down 3: JACKET (Col 13, Row 1)
-            {c:13, r:1, l:'J', n:3}, {c:13, r:2, l:'A'}, {c:13, r:3, l:'C'}, {c:13, r:4, l:'K'}, {c:13, r:5, l:'E'}, {c:13, r:6, l:'T'},
-            // Down 26: BESPOKE (Col 9, Row 5)
-            {c:9, r:5, l:'B', n:26}, {c:9, r:6, l:'E'}, {c:9, r:7, l:'S'}, {c:9, r:8, l:'P'}, {c:9, r:9, l:'O'}, {c:9, r:10, l:'K'}, {c:9, r:11, l:'E'},
-            // Down 31: THANKS (Col 6, Row 8)
-            {c:6, r:8, l:'T', n:31}, {c:6, r:9, l:'H'}, {c:6, r:10, l:'A'}, {c:6, r:11, l:'N'}, {c:6, r:12, l:'K'}, {c:6, r:13, l:'S'}
+            // Row 8
+            {c:4, r:8, l:'H'}, {c:10, r:8, l:'S'}, {c:11, r:8, l:'R'}, {c:13, r:8, l:'T'},
+            // Row 9
+            {c:4, r:9, l:'D'}, {c:10, r:9, l:'P'}, {c:11, r:9, l:'O'},
+            // Row 10: 32 Across (PAISLEY)
+            {c:3, r:10, l:'P', n:32}, {c:4, r:10, l:'A'}, {c:5, r:10, l:'I'}, {c:6, r:10, l:'S'}, {c:7, r:10, l:'L'}, {c:8, r:10, l:'E'}, {c:9, r:10, l:'Y'}, {c:10, r:10, l:'O'}, {c:11, r:10, l:'W'},
+            // Row 11
+            {c:4, r:11, l:'Y'}, {c:10, r:11, l:'K'},
+            // Row 12
+            {c:10, r:12, l:'E'}
         ];
 
         let gridBuilt = false;
@@ -191,34 +205,65 @@
             cwData.forEach(cell => {
                 let div = document.createElement('div');
                 div.className = 'cw-cell';
-                div.style.gridColumn = cell.c; div.style.gridRow = cell.r;
+                div.style.gridColumn = cell.c; 
+                div.style.gridRow = cell.r;
+                
                 let input = document.createElement('input');
-                input.maxLength = 1; input.dataset.ans = cell.l;
-                if(cell.n) { let num = document.createElement('span'); num.className = 'cw-num'; num.innerText = cell.n; div.appendChild(num); }
-                div.appendChild(input); grid.appendChild(div);
+                input.maxLength = 1; 
+                input.dataset.ans = cell.l;
+                input.dataset.row = cell.r; // This hardcodes the row for validation
+                
+                if(cell.n) { 
+                    let num = document.createElement('span'); 
+                    num.className = 'cw-num'; 
+                    num.innerText = cell.n; 
+                    div.appendChild(num); 
+                }
+                div.appendChild(input); 
+                grid.appendChild(div);
             });
+            
             const inputs = Array.from(document.querySelectorAll('.cw-cell input'));
             inputs.forEach((input, i) => {
                 input.addEventListener('input', function() { 
                     this.style.background = "transparent";
                     if(this.value.length === 1 && i < inputs.length - 1) inputs[i+1].focus(); 
                 });
-                input.addEventListener('keydown', function(e) { if(e.key === "Backspace" && this.value === "" && i > 0) inputs[i-1].focus(); });
+                input.addEventListener('keydown', function(e) { 
+                    if(e.key === "Backspace" && this.value === "" && i > 0) inputs[i-1].focus(); 
+                });
             });
             gridBuilt = true;
         }
 
         function verifyCrossword() {
-            let isCorrect = true;
+            let is28Correct = true;
+            let hasEmpty28 = false;
+            
             document.querySelectorAll('.cw-cell input').forEach(input => {
-                if(input.parentElement.style.gridRow === "7") {
-                    if(input.value.toUpperCase() !== input.dataset.ans) { input.style.background = "#ffcccc"; isCorrect = false; }
+                // We only care about verifying Row 7 (THOMSWEENEY)
+                if(input.dataset.row === "7") {
+                    if(input.value === "") {
+                        is28Correct = false;
+                        hasEmpty28 = true;
+                    } else if(input.value.toUpperCase() !== input.dataset.ans) { 
+                        input.style.background = "#ffcccc"; 
+                        is28Correct = false; 
+                    } else {
+                        input.style.background = "transparent";
+                    }
                 }
             });
-            if(isCorrect) next(3);
-            else document.getElementById('cw-error').innerText = "ERROR: Password Incorrect.";
+            
+            if(is28Correct && !hasEmpty28) {
+                document.getElementById('cw-error').innerText = "";
+                next(3);
+            } else { 
+                document.getElementById('cw-error').innerText = "ERROR: The Secret Password (28-Across) is incorrect or incomplete."; 
+            }
         }
 
+        // --- REST OF LOGIC ---
         function startSewing() { document.getElementById('sew-zone').classList.remove('hidden'); }
         let p = 0;
         function doSew() {
@@ -229,7 +274,8 @@
         let gear = 0;
         function equip(part, el) {
             document.getElementById('fit-' + part).classList.add('visible');
-            el.style.opacity = "0.3"; gear++;
+            el.style.opacity = "0.3"; 
+            gear++;
             if(gear >= 2) document.getElementById('final-btn').classList.remove('hidden');
         }
 
