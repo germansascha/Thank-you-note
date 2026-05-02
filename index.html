@@ -6,45 +6,83 @@
     <title>007 MISSION: SWEENEY</title>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* COLOR PALETTE: Gold, Black, and Classified Red */
         :root { --gold: #D4AF37; --bg: #0a0a0a; --red: #E63946; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; text-align: center; }
         .hidden { display: none !important; }
-        
+        html { scroll-behavior: smooth; }
+
         /* STANDARD SCREEN CONTAINER */
-        .screen { border: 1px solid #333; padding: 15px; width: 100%; max-width: 650px; margin: 10px auto; background: black; border-radius: 4px; position: relative; }
+        .screen { border: 1px solid #333; padding: 15px; width: 100%; max-width: 650px; margin: 10px auto; background: black; border-radius: 4px; position: relative; box-shadow: 0 0 18px rgba(212,175,55,0.18), 0 0 40px rgba(212,175,55,0.07); }
         .screen::before { content: "TOP SECRET"; position: absolute; top: -10px; left: 15px; background: var(--red); padding: 2px 8px; font-size: 10px; font-weight: bold; font-family: 'Special Elite'; }
 
         h1 { font-family: 'Special Elite', cursive; color: var(--gold); text-transform: uppercase; font-size: 1.4rem; margin: 10px 0; }
         h2 { font-size: 10px; letter-spacing: 3px; color: #888; text-transform: uppercase; margin-bottom: 15px; }
         p { color: #aaa; font-size: 13px; line-height: 1.5; }
-        
+
         /* BUTTONS & INPUTS */
         input.password { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 12px; width: 100%; text-align: center; font-family: 'Special Elite'; font-size: 18px; margin: 15px 0; outline: none; }
-        button { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; width: 100%; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        button { background: #111; border: 1px solid var(--gold); color: var(--gold); padding: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; width: 100%; font-weight: bold; margin-top: 10px; transition: background 0.2s, transform 0.1s; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         button:hover { background: var(--gold); color: black; }
+        button:active { transform: scale(0.96); }
 
-        /* CROSSWORD SPECIFICS - Optimized for iPhone */
+        /* SCANLINE OVERLAY */
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 2px); }
+
+        /* STAGE FADE-IN */
+        @keyframes stageFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .screen.fade-in { animation: stageFade 0.4s ease forwards; }
+
+        /* TOAST NOTIFICATION */
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1a1a1a; border: 1px solid var(--red); color: white; padding: 12px 20px; border-radius: 4px; font-size: 12px; font-family: 'Special Elite'; letter-spacing: 1px; z-index: 10000; opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 90vw; text-align: center; white-space: pre-line; }
+        #toast.show { opacity: 1; }
+        #toast.toast-success { border-color: var(--gold); color: var(--gold); }
+
+        /* MISSION PROGRESS BADGE */
+        .mission-progress { display: inline-block; font-size: 9px; letter-spacing: 2px; color: #555; font-family: 'Special Elite'; margin-bottom: 8px; }
+
+        /* TYPEWRITER CURSOR */
+        h1.typing::after { content: '|'; animation: blink 0.7s step-end infinite; color: var(--gold); }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* CROSSWORD SPECIFICS */
         .cw-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; margin-bottom: 20px; }
         .cw-grid { display: grid; grid-template-columns: repeat(16, 28px); grid-template-rows: repeat(12, 28px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
         .cw-cell { position: relative; background: #fff; width: 28px; height: 28px; }
         /* Font size MUST be 16px to prevent iOS Safari auto-zoom on tap */
         .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; background: transparent; }
         .cw-num { position: absolute; top: 0px; left: 1px; font-size: 8px; font-weight: bold; color: #000; z-index: 2; pointer-events: none; }
-        
+
+        /* PASSWORD ROW PULSE */
+        @keyframes pwPulse { 0%,100% { background: #fffde7; } 50% { background: #fff9c4; } }
+        .cw-cell.pw-row { animation: pwPulse 2.5s ease-in-out infinite; }
+        .cw-cell.pw-row input { background: transparent; }
+
+        /* WRONG ANSWER SHAKE */
+        @keyframes cwShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
+        .cw-cell.shake { animation: cwShake 0.4s ease; }
+
         .clues { text-align: left; font-size: 11px; color: #ccc; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
         .clue-col { width: 48%; }
         .clue-col h3 { color: var(--gold); font-size: 12px; margin-bottom: 5px; border-bottom: 1px solid #333; }
         .clue-col p { margin: 3px 0; }
 
-        /* STAGE 3: MANUFACTURING SWATCHES */
+        /* STAGE 3: MANUFACTURING */
         .swatch-group { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
         .swatch { width: 75px; height: 75px; border: 1px solid #444; cursor: pointer; background-size: cover; border-radius: 4px; display: inline-block; margin: 5px; }
-        .progress-container { width: 100%; background: #222; height: 12px; margin: 15px 0; border-radius: 6px; overflow: hidden;}
+        .progress-container { width: 100%; background: #222; height: 12px; margin: 15px 0; border-radius: 6px; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
 
-        /* STAGE 4: SUIT UP (PAPER DOLL MECHANIC) */
+        /* SEW BUTTON BOUNCE */
+        @keyframes sewBounce { 0%,100% { transform: scale(1); } 40% { transform: scale(0.92); } 70% { transform: scale(1.05); } }
+        #sew-btn.bounce { animation: sewBounce 0.2s ease; }
+        #sew-msg { font-size: 12px; color: var(--gold); font-family: 'Special Elite'; letter-spacing: 1px; min-height: 18px; margin: 6px 0; }
+
+        /* INLINE REJECTION BANNER */
+        #rejection-msg { font-size: 11px; color: var(--red); font-family: 'Special Elite'; letter-spacing: 1px; background: rgba(230,57,70,0.1); border: 1px solid var(--red); border-radius: 3px; padding: 6px 10px; margin-top: 8px; display: none; }
+        #rejection-msg.show { display: block; }
+
+        /* STAGE 4: SUIT UP */
         #suit-up-stage { position: relative; width: 280px; height: 400px; margin: 0 auto; background: #111; border: 1px solid #333; overflow: hidden; }
         #suit-up-stage img { position: absolute; width: 100%; height: 100%; object-fit: contain; left: 0; }
         .fitted { opacity: 0; transition: opacity 0.5s; pointer-events: none; }
@@ -52,23 +90,31 @@
         .inventory { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
         .inv-item { width: 60px; height: 60px; border: 1px solid #444; background: #000; cursor: pointer; object-fit: contain; margin: 5px; }
         .inv-item.used { border-color: var(--gold); opacity: 0.5; pointer-events: none; }
-        
+
+        /* INVENTORY SHAKE */
+        @keyframes invShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-5px); } 40%,80% { transform: translateX(5px); } }
+        .inv-item.rejected { animation: invShake 0.4s ease; border-color: var(--red) !important; }
+
         /* VIDEO STYLING */
         video { border: 2px solid var(--gold); background: #000; border-radius: 4px; }
     </style>
 </head>
 <body>
 
+    <div id="toast"></div>
+
     <div id="stage1" class="screen">
+        <p class="mission-progress">MISSION STATUS: ACCESS</p>
         <img src="IMG_6441.jpeg" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px;" alt="Finance Man Headshot">
         <h2>MI6 HQ LOGIN</h2>
         <h1>Finance Man identified</h1>
         <p>IDENTIFICATION REQUIRED TO ACCESS <br>CLASSIFIED RECOVERY LOGS.</p>
-        <input type="password" id="pass" class="password" placeholder="ENTER PASSWORD">
+        <input type="password" id="pass" class="password" placeholder="ENTER PASSWORD" enterkeyhint="done" onkeydown="if(event.key==='Enter')checkPass()">
         <button onclick="checkPass()">AUTHENTICATE</button>
     </div>
 
     <div id="stage0" class="screen hidden">
+        <p class="mission-progress">STAGE 1 / 5 — BRIEFING</p>
         <h2>INCOMING TRANSMISSION</h2>
         <h1>SITUATION REPORT</h1>
         <video id="openingVideo" width="100%" playsinline controls>
@@ -78,6 +124,7 @@
     </div>
 
     <div id="stage2" class="screen hidden">
+        <p class="mission-progress">STAGE 2 / 5 — DECRYPTION</p>
         <h2>MISSION PARAMETERS</h2>
         <h1>Sartorial Decryption</h1>
         <p style="color: var(--gold); font-weight: bold; margin-bottom: 10px; font-style: italic;">
@@ -86,11 +133,11 @@
         <p style="color: white; font-size: 11px; background: var(--red); padding: 5px; border-radius: 3px; margin-bottom: 15px;">
             CRITICAL: 28-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
         </p>
-        
+
         <div class="cw-container">
             <div id="cw-grid" class="cw-grid"></div>
         </div>
-        
+
         <div class="clues">
             <div class="clue-col">
                 <h3>ACROSS</h3>
@@ -107,12 +154,13 @@
                 <p><b>26.</b> Custom-made (what bees did)</p>
             </div>
         </div>
-        
+
         <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 10px;"></p>
         <button onclick="verifyCrossword()">VERIFY PASSWORD (28-ACROSS)</button>
     </div>
 
     <div id="stage25" class="screen hidden">
+        <p class="mission-progress">STAGE 2 / 5 — AUTHENTICATED</p>
         <h2>TRANSMISSION RECEIVED</h2>
         <h1>PASSWORD ACCEPTED</h1>
         <video id="transitionVideo" width="100%" playsinline controls>
@@ -122,27 +170,31 @@
     </div>
 
     <div id="stage3" class="screen hidden">
+        <p class="mission-progress">STAGE 3 / 5 — MANUFACTURING</p>
         <h2>DISGUISE MAKER FACILITIES</h2>
         <h1>Asset Reconstruction</h1>
         <p style="color: var(--gold); font-weight: bold; margin-bottom: 15px; font-style: italic;">
             "You've successfully accessed the secret disguise maker facilities! Help us select and create the best one."
         </p>
-        
+
         <div class="swatch-group">
-            <div class="swatch" style="background-image: url('IMG_0146.jpeg')" onclick="alert('REJECTED: Tartan is too loud.')"></div>
+            <div class="swatch" style="background-image: url('IMG_0146.jpeg')" onclick="reject(this, 'REJECTED: Tartan is too loud. Operational security compromised.')"></div>
             <div class="swatch" style="background-image: url('IMG_0145.jpeg')" onclick="startSewing()"></div>
-            <div class="swatch" style="background-image: url('IMG_0147.webp')" onclick="alert('REJECTED: Security risk.')"></div>
+            <div class="swatch" style="background-image: url('IMG_0147.webp')" onclick="reject(this, 'REJECTED: Security risk. Fabric traced to enemy asset.')"></div>
         </div>
 
         <div id="sew-zone" class="hidden">
             <img src="IMG_0156.gif" style="width: 150px; border: 1px solid var(--gold); border-radius: 4px;" alt="Sewing Machine">
-            <p>MASH TO INITIATE BESPOKE STITCHING</p>
-            <button onclick="doSew()">STITCH ARMOR</button>
+            <p>MASH THE BUTTON — FASTER, AGENT!</p>
+            <div id="sew-msg"></div>
+            <button id="sew-btn" onclick="doSew()">STITCH ARMOR</button>
             <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         </div>
+        <div id="rejection-msg"></div>
     </div>
 
     <div id="stage4" class="screen hidden">
+        <p class="mission-progress">STAGE 4 / 5 — ASSEMBLY</p>
         <h2>FINAL ASSEMBLY</h2>
         <h1>Armor Alignment</h1>
         <div id="suit-up-stage">
@@ -152,16 +204,17 @@
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)" alt="Trousers Icon">
-            <img src="IMG_6516.png" class="inv-item" onclick="alert('REJECTED: Finance Man is not going for the Midtown tech-bro look.')" alt="Vest">
+            <img src="IMG_6516.png" class="inv-item" onclick="rejectItem(this, 'REJECTED: Finance Man is not going for the Midtown tech-bro look.')" alt="Vest">
             <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)" alt="Jacket Icon">
-            <img src="IMG_0142.jpeg" class="inv-item" onclick="alert('REJECTED: Potassium levels too high. Bananas are not tactical.')" alt="Banana">
-            <img src="IMG_0143.jpeg" class="inv-item" onclick="alert('REJECTED: Stealth compromised.')" alt="Clown Pants">
-            <img src="IMG_0144.jpeg" class="inv-item" onclick="alert('REJECTED: Too heavy for modern espionage.')" alt="Armor">
+            <img src="IMG_0142.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Potassium levels too high. Bananas are not tactical.')" alt="Banana">
+            <img src="IMG_0143.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Stealth compromised. Clown pants detected by satellite.')" alt="Clown Pants">
+            <img src="IMG_0144.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Too heavy for modern espionage. Finance Man cannot run.')" alt="Armor">
         </div>
         <button id="final-btn" class="hidden" onclick="next(5)">FINALIZE DEPLOYMENT</button>
     </div>
 
     <div id="stage5" class="screen hidden">
+        <p class="mission-progress">STAGE 5 / 5 — MISSION COMPLETE</p>
         <h2>MISSION ACCOMPLISHED</h2>
         <div id="pre-video">
             <img src="IMG_6503.png" style="width: 100%; border: 1px solid var(--gold); margin-bottom: 10px;" alt="Exiting Shop">
@@ -176,23 +229,29 @@
     </div>
 
     <script>
-        // Navigation Logic: Hides all screens and shows the requested one
         function next(n) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('stage' + n).classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.add('hidden');
+                s.classList.remove('fade-in');
+            });
+            const el = document.getElementById('stage' + n);
+            el.classList.remove('hidden');
+            void el.offsetWidth;
+            el.classList.add('fade-in');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             if(n === 2 && !gridBuilt) buildGrid();
+            const h1 = el.querySelector('h1');
+            if(h1) typewriter(h1);
         }
 
-        // Checks initial password
         function checkPass() {
             if(document.getElementById('pass').value.toLowerCase() === 'birthdaypresent') {
-                next(0); // Go to Intro Video
+                next(0);
             } else {
-                alert('ACCESS DENIED. Incorrect Password.');
+                showToast('ACCESS DENIED.\nIncorrect Password.');
             }
         }
 
-        // --- BULLETPROOF CROSSWORD GRID DATA ---
         // 'c' = Column, 'r' = Row, 'l' = Letter Answer, 'n' = Clue Number (optional)
         const cwData = [
             // Row 2: 9 Across (SUIT) & 11 Down start
@@ -222,97 +281,197 @@
         let gridBuilt = false;
         function buildGrid() {
             const grid = document.getElementById('cw-grid');
+            const cellMap = {};
+
             cwData.forEach(cell => {
                 let div = document.createElement('div');
                 div.className = 'cw-cell';
-                div.style.gridColumn = cell.c; 
+                div.style.gridColumn = cell.c;
                 div.style.gridRow = cell.r;
-                
+                if(cell.r === 7) div.classList.add('pw-row');
+
                 let input = document.createElement('input');
-                input.maxLength = 1; 
-                input.dataset.ans = cell.l; // Stores the correct answer
-                input.dataset.row = cell.r; // Hardcodes the row for validation
-                
-                if(cell.n) { 
-                    let num = document.createElement('span'); 
-                    num.className = 'cw-num'; 
-                    num.innerText = cell.n; 
-                    div.appendChild(num); 
+                input.maxLength = 1;
+                input.dataset.ans = cell.l;
+                input.dataset.row = String(cell.r);
+                input.dataset.col = String(cell.c);
+                input.setAttribute('enterkeyhint', 'next');
+                input.setAttribute('autocomplete', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('autocapitalize', 'characters');
+
+                if(cell.n) {
+                    let num = document.createElement('span');
+                    num.className = 'cw-num';
+                    num.innerText = cell.n;
+                    div.appendChild(num);
                 }
-                div.appendChild(input); 
+                div.appendChild(input);
                 grid.appendChild(div);
+                cellMap[cell.c + ',' + cell.r] = input;
             });
-            
-            // Auto-advance and backspace logic for user convenience
-            const inputs = Array.from(document.querySelectorAll('.cw-cell input'));
-            inputs.forEach((input, i) => {
-                input.addEventListener('input', function() { 
-                    this.style.background = "transparent";
-                    if(this.value.length === 1 && i < inputs.length - 1) inputs[i+1].focus(); 
+
+            // Word-aware navigation using grid coordinates
+            Object.values(cellMap).forEach(input => {
+                input.addEventListener('input', function() {
+                    this.style.background = 'transparent';
+                    if(this.value.length === 1) {
+                        const c = parseInt(this.dataset.col);
+                        const r = parseInt(this.dataset.row);
+                        const nextAcross = cellMap[(c + 1) + ',' + r];
+                        if(nextAcross) { nextAcross.focus(); return; }
+                        const nextDown = cellMap[c + ',' + (r + 1)];
+                        if(nextDown) nextDown.focus();
+                    }
                 });
-                input.addEventListener('keydown', function(e) { 
-                    if(e.key === "Backspace" && this.value === "" && i > 0) inputs[i-1].focus(); 
+                input.addEventListener('keydown', function(e) {
+                    if(e.key === 'Backspace' && this.value === '') {
+                        const c = parseInt(this.dataset.col);
+                        const r = parseInt(this.dataset.row);
+                        const prevAcross = cellMap[(c - 1) + ',' + r];
+                        if(prevAcross) { prevAcross.focus(); return; }
+                        const prevDown = cellMap[c + ',' + (r - 1)];
+                        if(prevDown) prevDown.focus();
+                    }
                 });
             });
             gridBuilt = true;
         }
 
-        // Verifies ONLY Row 7 (28-Across) for the password to proceed
         function verifyCrossword() {
             let is28Correct = true;
             let hasEmpty28 = false;
-            
+
             document.querySelectorAll('.cw-cell input').forEach(input => {
-                // We only care about verifying Row 7 (THOMSWEENEY)
-                if(input.dataset.row === "7") {
-                    if(input.value === "") {
+                if(input.dataset.row === '7') {
+                    const cell = input.parentElement;
+                    cell.classList.remove('shake');
+                    if(input.value === '') {
                         is28Correct = false;
                         hasEmpty28 = true;
-                    } else if(input.value.toUpperCase() !== input.dataset.ans) { 
-                        input.style.background = "#ffcccc"; // Turn cell red if wrong
-                        is28Correct = false; 
+                        input.style.background = '#ffcccc';
+                        requestAnimationFrame(() => cell.classList.add('shake'));
+                    } else if(input.value.toUpperCase() !== input.dataset.ans) {
+                        input.style.background = '#ffcccc';
+                        is28Correct = false;
+                        requestAnimationFrame(() => cell.classList.add('shake'));
                     } else {
-                        input.style.background = "transparent";
+                        input.style.background = 'transparent';
                     }
                 }
             });
-            
+
+            setTimeout(() => {
+                document.querySelectorAll('.cw-cell.shake').forEach(c => c.classList.remove('shake'));
+            }, 500);
+
             if(is28Correct && !hasEmpty28) {
-                document.getElementById('cw-error').innerText = "";
-                next(25); // Proceed to Stage 2.5 (Transition Video)
-            } else { 
-                document.getElementById('cw-error').innerText = "ERROR: The Secret Password (28-Across) is incorrect or incomplete."; 
+                document.getElementById('cw-error').innerText = '';
+                next(25);
+            } else {
+                document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (28-Across) is incorrect or incomplete.';
             }
         }
 
-        // --- MANUFACTURING LOGIC ---
-        function startSewing() { 
-            document.getElementById('sew-zone').classList.remove('hidden'); 
-        }
-        
-        let p = 0;
-        function doSew() {
-            p += 15; 
-            document.getElementById('progress-bar').style.width = p + '%';
-            if(p >= 100) setTimeout(() => next(4), 500); // Proceed to Suit Up
+        function startSewing() {
+            document.getElementById('sew-zone').classList.remove('hidden');
         }
 
-        // --- SUIT UP LOGIC ---
+        const SEW_MESSAGES = [
+            '',
+            'THREAD ENGAGED...',
+            'STITCHING INITIATED...',
+            'SEAMS HOLDING...',
+            'HALFWAY THERE, AGENT!',
+            'FABRIC REINFORCED!',
+            'ALMOST BATTLE-READY...',
+            'SUIT COMPLETE. DEPLOYING.'
+        ];
+        let sewClicks = 0;
+        const SEW_TOTAL = 7;
+
+        function doSew() {
+            if(sewClicks >= SEW_TOTAL) return;
+            sewClicks++;
+            const pct = Math.round((sewClicks / SEW_TOTAL) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('sew-msg').innerText = SEW_MESSAGES[sewClicks] || '';
+
+            const btn = document.getElementById('sew-btn');
+            btn.classList.remove('bounce');
+            void btn.offsetWidth;
+            btn.classList.add('bounce');
+
+            if(sewClicks >= SEW_TOTAL) {
+                btn.disabled = true;
+                setTimeout(() => next(4), 600);
+            }
+        }
+
         let gear = 0;
         function equip(part, el) {
-            document.getElementById('fit-' + part).classList.add('visible'); // Show item on body
-            el.style.opacity = "0.3"; // Dim the inventory icon
+            document.getElementById('fit-' + part).classList.add('visible');
+            el.classList.add('used');
             gear++;
-            if(gear >= 2) document.getElementById('final-btn').classList.remove('hidden'); // Show finish button
+            if(gear >= 2) document.getElementById('final-btn').classList.remove('hidden');
         }
 
-        // --- FINAL VIDEO TRIGGER ---
-        // Needed because iOS Safari blocks autoplaying videos without user interaction
+        // --- HELPERS ---
+
+        let toastTimer = null;
+        function showToast(msg, isSuccess) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = isSuccess ? 'show toast-success' : 'show';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+        }
+
+        function reject(el, msg) {
+            const rm = document.getElementById('rejection-msg');
+            rm.innerText = '[ INTEL REPORT ] ' + msg;
+            rm.classList.add('show');
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = 'invShake 0.4s ease';
+        }
+
+        function rejectItem(el, msg) {
+            el.classList.remove('rejected');
+            void el.offsetWidth;
+            el.classList.add('rejected');
+            showToast(msg);
+            setTimeout(() => el.classList.remove('rejected'), 500);
+        }
+
+        function typewriter(el) {
+            const text = el.innerText;
+            el.innerText = '';
+            el.classList.add('typing');
+            let i = 0;
+            const tick = setInterval(() => {
+                el.innerText += text[i];
+                i++;
+                if(i >= text.length) {
+                    clearInterval(tick);
+                    el.classList.remove('typing');
+                }
+            }, 50);
+        }
+
         function playReveal() {
             document.getElementById('pre-video').classList.add('hidden');
             document.getElementById('video-container').classList.remove('hidden');
             document.getElementById('revealVideo').play();
         }
+
+        // Kick off typewriter + fade on the initial login screen
+        document.addEventListener('DOMContentLoaded', () => {
+            const s1 = document.getElementById('stage1');
+            void s1.offsetWidth;
+            s1.classList.add('fade-in');
+            typewriter(s1.querySelector('h1'));
+        });
     </script>
 </body>
 </html>
