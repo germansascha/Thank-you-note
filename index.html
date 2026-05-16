@@ -47,8 +47,8 @@
 
         /* CROSSWORD SPECIFICS */
         .cw-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; margin-bottom: 20px; }
-        .cw-grid { display: grid; grid-template-columns: repeat(32, 24px); grid-template-rows: repeat(26, 24px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
-        .cw-cell { position: relative; background: #fff; width: 24px; height: 24px; }
+        .cw-grid { display: grid; grid-template-columns: repeat(32, 22px); grid-template-rows: repeat(26, 22px); gap: 1px; width: fit-content; margin: 0 auto; background: #000; border: 2px solid #333; padding: 2px; }
+        .cw-cell { position: relative; background: #fff; width: 22px; height: 22px; }
         /* Font size MUST be 16px to prevent iOS Safari auto-zoom on tap */
         .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; background: transparent; }
         .cw-num { position: absolute; top: 0px; left: 1px; font-size: 8px; font-weight: bold; color: #000; z-index: 2; pointer-events: none; }
@@ -267,96 +267,59 @@
             }
         }
 
-        // Full crossword — 23 words, 32×26 grid. Duplicates are resolved in buildGrid().
-        // 'c'=column, 'r'=row, 'l'=letter, 'n'=clue number, 'pw'=password row
+        // Exact cwData from reference template — same ordering ensures correct dedup
+        // pw:true marks only the THOMSWEENEY password cells (28-Across, r:15, c:10-20)
         const cwData = [
-            // ── ACROSS ──
-            // 7-Across: LAPEL (r:6, c:18-22)  ← (21,6)=BESPOKE∩, (22,6)=LAIR∩
-            {c:18,r:6,l:'L',n:7},{c:19,r:6,l:'A'},{c:20,r:6,l:'P'},{c:21,r:6,l:'E'},{c:22,r:6,l:'L'},
-            // 9-Across: SUIT (r:10, c:16-19)  ← (16,10) also start of 11-Down
+            // Across words (processed first so their n values win at intersections)
+            {c:10,r:15,l:'T',n:28,pw:true},{c:11,r:15,l:'H',pw:true},{c:12,r:15,l:'O',pw:true},{c:13,r:15,l:'M',pw:true},{c:14,r:15,l:'S',pw:true},{c:15,r:15,l:'W',pw:true},{c:16,r:15,l:'E',pw:true},{c:17,r:15,l:'E',pw:true},{c:18,r:15,l:'N',pw:true},{c:19,r:15,l:'E',pw:true},{c:20,r:15,l:'Y',pw:true},
             {c:16,r:10,l:'S',n:9},{c:17,r:10,l:'U'},{c:18,r:10,l:'I'},{c:19,r:10,l:'T'},
-            // 17-Across: THREAD (r:8, c:14-19)  ← (14,8)=BUTTON∩
-            {c:14,r:8,l:'T',n:17},{c:15,r:8,l:'H'},{c:16,r:8,l:'R'},{c:17,r:8,l:'E'},{c:18,r:8,l:'A'},{c:19,r:8,l:'D'},
-            // 19-Across: ALTER (r:20, c:3-7)
-            {c:3,r:20,l:'A',n:19},{c:4,r:20,l:'L'},{c:5,r:20,l:'T'},{c:6,r:20,l:'E'},{c:7,r:20,l:'R'},
-            // 22-Across: LINING (r:14, c:16-21)  ← (16,14)=SAVILEROW∩
             {c:16,r:14,l:'L',n:22},{c:17,r:14,l:'I'},{c:18,r:14,l:'N'},{c:19,r:14,l:'I'},{c:20,r:14,l:'N'},{c:21,r:14,l:'G'},
-            // 24-Across: COLLAR (r:13, c:6-11)  ← (8,13)=SLEEVE∩, (11,13)=BIRTHDAY∩
             {c:6,r:13,l:'C',n:24},{c:7,r:13,l:'O'},{c:8,r:13,l:'L'},{c:9,r:13,l:'L'},{c:10,r:13,l:'A'},{c:11,r:13,l:'R'},
-            // 28-Across: THOMSWEENEY (r:15, c:10-20) — THE PASSWORD ROW
-            {c:10,r:15,l:'T',n:28,pw:true},{c:11,r:15,l:'H',pw:true},{c:12,r:15,l:'O',pw:true},
-            {c:13,r:15,l:'M',pw:true},{c:14,r:15,l:'S',pw:true},{c:15,r:15,l:'W',pw:true},
-            {c:16,r:15,l:'E',pw:true},{c:17,r:15,l:'E',pw:true},{c:18,r:15,l:'N',pw:true},
-            {c:19,r:15,l:'E',pw:true},{c:20,r:15,l:'Y',pw:true},
-            // 29-Across: WHETHER (r:19, c:2-8)
             {c:2,r:19,l:'W',n:29},{c:3,r:19,l:'H'},{c:4,r:19,l:'E'},{c:5,r:19,l:'T'},{c:6,r:19,l:'H'},{c:7,r:19,l:'E'},{c:8,r:19,l:'R'},
-            // 30-Across: MAZEL (r:20, c:18-22)
+            {c:14,r:8,l:'T',n:17},{c:15,r:8,l:'H'},{c:16,r:8,l:'R'},{c:17,r:8,l:'E'},{c:18,r:8,l:'A'},{c:19,r:8,l:'D'},
+            {c:18,r:6,l:'L',n:7},{c:19,r:6,l:'A'},{c:20,r:6,l:'P'},{c:21,r:6,l:'E'},{c:22,r:6,l:'L'},
             {c:18,r:20,l:'M',n:30},{c:19,r:20,l:'A'},{c:20,r:20,l:'Z'},{c:21,r:20,l:'E'},{c:22,r:20,l:'L'},
-            // 32-Across: PAISLEY (r:22, c:13-19)
+            {c:3,r:20,l:'A',n:19},{c:4,r:20,l:'L'},{c:5,r:20,l:'T'},{c:6,r:20,l:'E'},{c:7,r:20,l:'R'},
             {c:13,r:22,l:'P',n:32},{c:14,r:22,l:'A'},{c:15,r:22,l:'I'},{c:16,r:22,l:'S'},{c:17,r:22,l:'L'},{c:18,r:22,l:'E'},{c:19,r:22,l:'Y'},
-            // 34-Across: SHIRT (r:25, c:13-17)
             {c:13,r:25,l:'S',n:34},{c:14,r:25,l:'H'},{c:15,r:25,l:'I'},{c:16,r:25,l:'R'},{c:17,r:25,l:'T'},
-
-            // ── DOWN ──
-            // 1-Down: WIDENED (c:2, r:6-12)
-            {c:2,r:6,l:'W',n:1},{c:2,r:7,l:'I'},{c:2,r:8,l:'D'},{c:2,r:9,l:'E'},{c:2,r:10,l:'N'},{c:2,r:11,l:'E'},{c:2,r:12,l:'D'},
-            // 3-Down: JACKET (c:2, r:13-18)
-            {c:2,r:13,l:'J',n:3},{c:2,r:14,l:'A'},{c:2,r:15,l:'C'},{c:2,r:16,l:'K'},{c:2,r:17,l:'E'},{c:2,r:18,l:'T'},
-            // 5-Down: BUTTON (c:14, r:5-10)  ← (14,8)=THREAD∩ — n:17 already assigned there
-            {c:14,r:5,l:'B',n:5},{c:14,r:6,l:'U'},{c:14,r:7,l:'T'},{c:14,r:8,l:'T'},{c:14,r:9,l:'O'},{c:14,r:10,l:'N'},
-            // 11-Down: SAVILEROW (c:16, r:10-18)  ← (16,10)=SUIT∩, (16,14)=LINING∩, (16,15)=THOMSWEENEY∩
-            // n:11 lost at (16,10) since n:9 wins — clues note this
-            {c:16,r:10,l:'S',n:11},{c:16,r:11,l:'A'},{c:16,r:12,l:'V'},{c:16,r:13,l:'I'},
-            {c:16,r:14,l:'L'},{c:16,r:15,l:'E'},{c:16,r:16,l:'R'},{c:16,r:17,l:'O'},{c:16,r:18,l:'W'},
-            // 13-Down: TAILOR (c:24, r:10-15)
-            {c:24,r:10,l:'T',n:13},{c:24,r:11,l:'A'},{c:24,r:12,l:'I'},{c:24,r:13,l:'L'},{c:24,r:14,l:'O'},{c:24,r:15,l:'R'},
-            // 15-Down: MENSWEAR (c:26, r:10-17)
-            {c:26,r:10,l:'M',n:15},{c:26,r:11,l:'E'},{c:26,r:12,l:'N'},{c:26,r:13,l:'S'},{c:26,r:14,l:'W'},{c:26,r:15,l:'E'},{c:26,r:16,l:'A'},{c:26,r:17,l:'R'},
-            // 18-Down: BIRTHDAY (c:11, r:11-18)  ← (11,13)=COLLAR∩ 'R', (11,15)=THOMSWEENEY∩ 'H'
-            {c:11,r:11,l:'B',n:18},{c:11,r:12,l:'I'},{c:11,r:13,l:'R'},{c:11,r:14,l:'T'},
-            {c:11,r:15,l:'H'},{c:11,r:16,l:'D'},{c:11,r:17,l:'A'},{c:11,r:18,l:'Y'},
-            // 20-Down: SLEEVE (c:8, r:12-17)  ← (8,13)=COLLAR∩ 'L'
+            // Down words (duplicates at intersections are silently skipped)
+            {c:11,r:11,l:'B',n:18},{c:11,r:12,l:'I'},{c:11,r:13,l:'R'},{c:11,r:14,l:'T'},{c:11,r:15,l:'H'},{c:11,r:16,l:'D'},{c:11,r:17,l:'A'},{c:11,r:18,l:'Y'},
+            {c:16,r:10,l:'S',n:11},{c:16,r:11,l:'A'},{c:16,r:12,l:'V'},{c:16,r:13,l:'I'},{c:16,r:14,l:'L'},{c:16,r:15,l:'E'},{c:16,r:16,l:'R'},{c:16,r:17,l:'O'},{c:16,r:18,l:'W'},
             {c:8,r:12,l:'S',n:20},{c:8,r:13,l:'L'},{c:8,r:14,l:'E'},{c:8,r:15,l:'E'},{c:8,r:16,l:'V'},{c:8,r:17,l:'E'},
-            // 26-Down: BESPOKE (c:21, r:5-11)  ← (21,6)=LAPEL∩ 'E'
+            {c:2,r:13,l:'J',n:3},{c:2,r:14,l:'A'},{c:2,r:15,l:'C'},{c:2,r:16,l:'K'},{c:2,r:17,l:'E'},{c:2,r:18,l:'T'},
+            {c:2,r:6,l:'W',n:1},{c:2,r:7,l:'I'},{c:2,r:8,l:'D'},{c:2,r:9,l:'E'},{c:2,r:10,l:'N'},{c:2,r:11,l:'E'},{c:2,r:12,l:'D'},
+            {c:14,r:5,l:'B',n:5},{c:14,r:6,l:'U'},{c:14,r:7,l:'T'},{c:14,r:8,l:'T'},{c:14,r:9,l:'O'},{c:14,r:10,l:'N'},
             {c:21,r:5,l:'B',n:26},{c:21,r:6,l:'E'},{c:21,r:7,l:'S'},{c:21,r:8,l:'P'},{c:21,r:9,l:'O'},{c:21,r:10,l:'K'},{c:21,r:11,l:'E'},
-            // 27-Down: SEAM (c:28, r:18-21)
+            {c:22,r:6,l:'L',n:33},{c:22,r:7,l:'A'},{c:22,r:8,l:'I'},{c:22,r:9,l:'R'},
+            {c:24,r:10,l:'T',n:13},{c:24,r:11,l:'A'},{c:24,r:12,l:'I'},{c:24,r:13,l:'L'},{c:24,r:14,l:'O'},{c:24,r:15,l:'R'},
+            {c:26,r:10,l:'M',n:15},{c:26,r:11,l:'E'},{c:26,r:12,l:'N'},{c:26,r:13,l:'S'},{c:26,r:14,l:'W'},{c:26,r:15,l:'E'},{c:26,r:16,l:'A'},{c:26,r:17,l:'R'},
             {c:28,r:18,l:'S',n:27},{c:28,r:19,l:'E'},{c:28,r:20,l:'A'},{c:28,r:21,l:'M'},
-            // 31-Down: THANKS (c:30, r:15-20)
-            {c:30,r:15,l:'T',n:31},{c:30,r:16,l:'H'},{c:30,r:17,l:'A'},{c:30,r:18,l:'N'},{c:30,r:19,l:'K'},{c:30,r:20,l:'S'},
-            // 33-Down: LAIR (c:22, r:6-9)  ← (22,6)=LAPEL∩ 'L' — n:33 fills since LAPEL has no n there
-            {c:22,r:6,l:'L',n:33},{c:22,r:7,l:'A'},{c:22,r:8,l:'I'},{c:22,r:9,l:'R'}
+            {c:30,r:15,l:'T',n:31},{c:30,r:16,l:'H'},{c:30,r:17,l:'A'},{c:30,r:18,l:'N'},{c:30,r:19,l:'K'},{c:30,r:20,l:'S'}
         ];
 
         let gridBuilt = false;
         function buildGrid() {
             const grid = document.getElementById('cw-grid');
-            const cellMap = {};   // col,row → input element
-            const cellDef = {};   // col,row → merged cell definition (dedup)
+            const cellMap = {};
+            const seen = new Set();
 
-            // First pass: merge duplicates — first 'n' encountered wins
             cwData.forEach(cell => {
                 const key = cell.c + ',' + cell.r;
-                if(!cellDef[key]) {
-                    cellDef[key] = { ...cell };
-                } else {
-                    if(cell.n && !cellDef[key].n) cellDef[key].n = cell.n;
-                    if(cell.pw) cellDef[key].pw = true;
-                }
-            });
+                if(seen.has(key)) return; // first occurrence wins entirely
+                seen.add(key);
 
-            // Second pass: render unique cells
-            Object.values(cellDef).forEach(cell => {
                 let div = document.createElement('div');
                 div.className = 'cw-cell';
                 div.style.gridColumn = cell.c;
                 div.style.gridRow = cell.r;
-                if(cell.r === 15) div.classList.add('pw-row');
+                if(cell.pw) div.classList.add('pw-row'); // only true THOMSWEENEY cells
 
                 let input = document.createElement('input');
                 input.maxLength = 1;
                 input.dataset.ans = cell.l;
                 input.dataset.row = String(cell.r);
                 input.dataset.col = String(cell.c);
+                if(cell.pw) input.dataset.pw = '1'; // used by verifyCrossword
                 input.setAttribute('enterkeyhint', 'next');
                 input.setAttribute('autocomplete', 'off');
                 input.setAttribute('autocorrect', 'off');
@@ -370,7 +333,7 @@
                 }
                 div.appendChild(input);
                 grid.appendChild(div);
-                cellMap[cell.c + ',' + cell.r] = input;
+                cellMap[key] = input;
             });
 
             // Word-aware navigation using grid coordinates
@@ -404,22 +367,21 @@
             let is28Correct = true;
             let hasEmpty28 = false;
 
-            document.querySelectorAll('.cw-cell input').forEach(input => {
-                if(input.dataset.row === '15') {
-                    const cell = input.parentElement;
-                    cell.classList.remove('shake');
-                    if(input.value === '') {
-                        is28Correct = false;
-                        hasEmpty28 = true;
-                        input.style.background = '#ffcccc';
-                        requestAnimationFrame(() => cell.classList.add('shake'));
-                    } else if(input.value.toUpperCase() !== input.dataset.ans) {
-                        input.style.background = '#ffcccc';
-                        is28Correct = false;
-                        requestAnimationFrame(() => cell.classList.add('shake'));
-                    } else {
-                        input.style.background = 'transparent';
-                    }
+            // Only check cells with dataset.pw === '1' — the 11 THOMSWEENEY cells
+            document.querySelectorAll('.cw-cell input[data-pw="1"]').forEach(input => {
+                const cell = input.parentElement;
+                cell.classList.remove('shake');
+                if(input.value === '') {
+                    is28Correct = false;
+                    hasEmpty28 = true;
+                    input.style.background = '#ffcccc';
+                    requestAnimationFrame(() => cell.classList.add('shake'));
+                } else if(input.value.toUpperCase() !== input.dataset.ans) {
+                    input.style.background = '#ffcccc';
+                    is28Correct = false;
+                    requestAnimationFrame(() => cell.classList.add('shake'));
+                } else {
+                    input.style.background = 'transparent';
                 }
             });
 
