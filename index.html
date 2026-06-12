@@ -47,8 +47,8 @@
 
         /* CROSSWORD SPECIFICS */
         .cw-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; margin-bottom: 20px; }
-        .cw-grid { position: relative; width: 706px; height: 582px; background: #000; border: 2px solid #444; flex-shrink: 0; margin: 0 auto; }
-        .cw-cell { position: absolute; background: #fff; width: 22px; height: 22px; }
+        .cw-grid { position: relative; width: 672px; height: 562px; background: #000; border: 2px solid #444; flex-shrink: 0; margin: 0 auto; }
+        .cw-cell { position: absolute; background: #fff; width: 22px; height: 22px; border: 1px solid #bbb; box-sizing: border-box; }
         /* Font size MUST be 16px to prevent iOS Safari auto-zoom on tap */
         .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; background: transparent; outline: none; }
         .cw-num { position: absolute; top: 1px; left: 1px; font-size: 7px; font-weight: bold; color: #333; z-index: 2; pointer-events: none; line-height: 1; }
@@ -310,10 +310,9 @@
 
                 let div = document.createElement('div');
                 div.className = 'cw-cell';
-                // Absolute positioning: each column/row is 23px (22px cell + 1px gap)
-                // 4px padding inside the black border before column 1 / row 1
-                div.style.left = ((cell.c - 1) * 23 + 4) + 'px';
-                div.style.top  = ((cell.r - 1) * 23 + 4) + 'px';
+                // Stride = 22px (cell width, no gap) — adjacent cells touch directly
+                div.style.left = ((cell.c - 1) * 22 + 4) + 'px';
+                div.style.top  = ((cell.r - 1) * 22 + 4) + 'px';
                 if(cell.pw) div.classList.add('pw-row'); // only true THOMSWEENEY cells
 
                 let input = document.createElement('input');
