@@ -132,7 +132,7 @@
             "Finance Man needs your help to find his civilian disguise. Solve the riddle to find the password for the secret location!"
         </p>
         <p style="color: white; font-size: 11px; background: var(--red); padding: 5px; border-radius: 3px; margin-bottom: 15px;">
-            CRITICAL: 28-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
+            CRITICAL: 6-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
         </p>
 
         <div class="cw-container">
@@ -142,37 +142,20 @@
         <div class="clues">
             <div class="clue-col">
                 <h3>ACROSS</h3>
-                <p><b>7.</b> Jacket fold</p>
-                <p><b>9.</b> Business attire or legal action</p>
-                <p><b>17.</b> What holds a garment together</p>
-                <p><b>19.</b> Change slightly</p>
-                <p><b>22.</b> Jacket interior — silver lining?</p>
-                <p><b>24.</b> Shirt neckline or grab by the scruff</p>
-                <p><b>28.</b> ★ THE SECRET PASSWORD ★</p>
-                <p><b>29.</b> If — or a British weather topic</p>
-                <p><b>30.</b> Good fortune at a simcha</p>
-                <p><b>32.</b> Curvy fabric pattern</p>
-                <p><b>34.</b> Garment under a jacket</p>
+                <p><b>6.</b> ★ THE SECRET PASSWORD ★<br><em style="font-size:10px;">Finance Man's tailor — fill all 11 boxes</em></p>
             </div>
             <div class="clue-col">
                 <h3>DOWN</h3>
-                <p><b>1.</b> Made a bit roomier</p>
-                <p><b>3.</b> Suit top or potato skin</p>
-                <p><b>5.</b> Blazer fastener</p>
-                <p><b>11.</b> Famous London tailoring street <em>(starts at ⑨)</em></p>
-                <p><b>13.</b> One who adjusts hems</p>
-                <p><b>15.</b> Department of suits and such</p>
-                <p><b>18.</b> Annual cake occasion</p>
-                <p><b>20.</b> Part of a jacket</p>
-                <p><b>26.</b> Custom-made (what bees did)</p>
-                <p><b>27.</b> Join in cloth</p>
-                <p><b>31.</b> Expression of gratitude</p>
-                <p><b>33.</b> Hideout or somewhere to recline</p>
+                <p><b>1.</b> Brief star appearance — or a spy's cover role</p>
+                <p><b>2.</b> Arm joint; well-cut sleeves leave room here</p>
+                <p><b>3.</b> Breathable summer suit fabric</p>
+                <p><b>4.</b> Smart outfit, legal action, or to fit perfectly</p>
+                <p><b>5.</b> Classic suit shade — and London's default sky</p>
             </div>
         </div>
 
         <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 10px;"></p>
-        <button onclick="verifyCrossword()">VERIFY PASSWORD (28-ACROSS)</button>
+        <button onclick="verifyCrossword()">VERIFY PASSWORD (6-ACROSS)</button>
     </div>
 
     <div id="stage25" class="screen hidden">
@@ -268,34 +251,24 @@
             }
         }
 
-        // Exact cwData from reference template — same ordering ensures correct dedup
-        // pw:true marks only the THOMSWEENEY password cells (28-Across, r:15, c:10-20)
+        // cwData: mini crossword — 5 down words all ending at the THOMSWEENEY password row
+        // Intersections (verified): SUIT→T, CAMEO→O, ELBOW→W, LINEN→N, GREY→Y
         const cwData = [
-            // Across words (processed first so their n values win at intersections)
-            {c:10,r:15,l:'T',n:28,pw:true},{c:11,r:15,l:'H',pw:true},{c:12,r:15,l:'O',pw:true},{c:13,r:15,l:'M',pw:true},{c:14,r:15,l:'S',pw:true},{c:15,r:15,l:'W',pw:true},{c:16,r:15,l:'E',pw:true},{c:17,r:15,l:'E',pw:true},{c:18,r:15,l:'N',pw:true},{c:19,r:15,l:'E',pw:true},{c:20,r:15,l:'Y',pw:true},
-            {c:16,r:10,l:'S',n:9},{c:17,r:10,l:'U'},{c:18,r:10,l:'I'},{c:19,r:10,l:'T'},
-            {c:16,r:14,l:'L',n:22},{c:17,r:14,l:'I'},{c:18,r:14,l:'N'},{c:19,r:14,l:'I'},{c:20,r:14,l:'N'},{c:21,r:14,l:'G'},
-            {c:6,r:13,l:'C',n:24},{c:7,r:13,l:'O'},{c:8,r:13,l:'L'},{c:9,r:13,l:'L'},{c:10,r:13,l:'A'},{c:11,r:13,l:'R'},
-            {c:2,r:19,l:'W',n:29},{c:3,r:19,l:'H'},{c:4,r:19,l:'E'},{c:5,r:19,l:'T'},{c:6,r:19,l:'H'},{c:7,r:19,l:'E'},{c:8,r:19,l:'R'},
-            {c:14,r:8,l:'T',n:17},{c:15,r:8,l:'H'},{c:16,r:8,l:'R'},{c:17,r:8,l:'E'},{c:18,r:8,l:'A'},{c:19,r:8,l:'D'},
-            {c:18,r:6,l:'L',n:7},{c:19,r:6,l:'A'},{c:20,r:6,l:'P'},{c:21,r:6,l:'E'},{c:22,r:6,l:'L'},
-            {c:18,r:20,l:'M',n:30},{c:19,r:20,l:'A'},{c:20,r:20,l:'Z'},{c:21,r:20,l:'E'},{c:22,r:20,l:'L'},
-            {c:3,r:20,l:'A',n:19},{c:4,r:20,l:'L'},{c:5,r:20,l:'T'},{c:6,r:20,l:'E'},{c:7,r:20,l:'R'},
-            {c:13,r:22,l:'P',n:32},{c:14,r:22,l:'A'},{c:15,r:22,l:'I'},{c:16,r:22,l:'S'},{c:17,r:22,l:'L'},{c:18,r:22,l:'E'},{c:19,r:22,l:'Y'},
-            {c:13,r:25,l:'S',n:34},{c:14,r:25,l:'H'},{c:15,r:25,l:'I'},{c:16,r:25,l:'R'},{c:17,r:25,l:'T'},
-            // Down words (duplicates at intersections are silently skipped)
-            {c:11,r:11,l:'B',n:18},{c:11,r:12,l:'I'},{c:11,r:13,l:'R'},{c:11,r:14,l:'T'},{c:11,r:15,l:'H'},{c:11,r:16,l:'D'},{c:11,r:17,l:'A'},{c:11,r:18,l:'Y'},
-            {c:16,r:10,l:'S',n:11},{c:16,r:11,l:'A'},{c:16,r:12,l:'V'},{c:16,r:13,l:'I'},{c:16,r:14,l:'L'},{c:16,r:15,l:'E'},{c:16,r:16,l:'R'},{c:16,r:17,l:'O'},{c:16,r:18,l:'W'},
-            {c:8,r:12,l:'S',n:20},{c:8,r:13,l:'L'},{c:8,r:14,l:'E'},{c:8,r:15,l:'E'},{c:8,r:16,l:'V'},{c:8,r:17,l:'E'},
-            {c:2,r:13,l:'J',n:3},{c:2,r:14,l:'A'},{c:2,r:15,l:'C'},{c:2,r:16,l:'K'},{c:2,r:17,l:'E'},{c:2,r:18,l:'T'},
-            {c:2,r:6,l:'W',n:1},{c:2,r:7,l:'I'},{c:2,r:8,l:'D'},{c:2,r:9,l:'E'},{c:2,r:10,l:'N'},{c:2,r:11,l:'E'},{c:2,r:12,l:'D'},
-            {c:14,r:5,l:'B',n:5},{c:14,r:6,l:'U'},{c:14,r:7,l:'T'},{c:14,r:8,l:'T'},{c:14,r:9,l:'O'},{c:14,r:10,l:'N'},
-            {c:21,r:5,l:'B',n:26},{c:21,r:6,l:'E'},{c:21,r:7,l:'S'},{c:21,r:8,l:'P'},{c:21,r:9,l:'O'},{c:21,r:10,l:'K'},{c:21,r:11,l:'E'},
-            {c:22,r:6,l:'L',n:33},{c:22,r:7,l:'A'},{c:22,r:8,l:'I'},{c:22,r:9,l:'R'},
-            {c:24,r:10,l:'T',n:13},{c:24,r:11,l:'A'},{c:24,r:12,l:'I'},{c:24,r:13,l:'L'},{c:24,r:14,l:'O'},{c:24,r:15,l:'R'},
-            {c:26,r:10,l:'M',n:15},{c:26,r:11,l:'E'},{c:26,r:12,l:'N'},{c:26,r:13,l:'S'},{c:26,r:14,l:'W'},{c:26,r:15,l:'E'},{c:26,r:16,l:'A'},{c:26,r:17,l:'R'},
-            {c:28,r:18,l:'S',n:27},{c:28,r:19,l:'E'},{c:28,r:20,l:'A'},{c:28,r:21,l:'M'},
-            {c:30,r:15,l:'T',n:31},{c:30,r:16,l:'H'},{c:30,r:17,l:'A'},{c:30,r:18,l:'N'},{c:30,r:19,l:'K'},{c:30,r:20,l:'S'}
+            // 6A: THOMSWEENEY (listed first so pw cells win dedup at intersections)
+            {c:1,r:5,l:'T',n:6,pw:true},{c:2,r:5,l:'H',pw:true},{c:3,r:5,l:'O',pw:true},
+            {c:4,r:5,l:'M',pw:true},{c:5,r:5,l:'S',pw:true},{c:6,r:5,l:'W',pw:true},
+            {c:7,r:5,l:'E',pw:true},{c:8,r:5,l:'E',pw:true},{c:9,r:5,l:'N',pw:true},
+            {c:10,r:5,l:'E',pw:true},{c:11,r:5,l:'Y',pw:true},
+            // 4D: SUIT (T at 1,5 is duplicate, skipped — T already from 6A above)
+            {c:1,r:2,l:'S',n:4},{c:1,r:3,l:'U'},{c:1,r:4,l:'I'},{c:1,r:5,l:'T'},
+            // 1D: CAMEO (O at 3,5 duplicate)
+            {c:3,r:1,l:'C',n:1},{c:3,r:2,l:'A'},{c:3,r:3,l:'M'},{c:3,r:4,l:'E'},{c:3,r:5,l:'O'},
+            // 2D: ELBOW (W at 6,5 duplicate)
+            {c:6,r:1,l:'E',n:2},{c:6,r:2,l:'L'},{c:6,r:3,l:'B'},{c:6,r:4,l:'O'},{c:6,r:5,l:'W'},
+            // 3D: LINEN (N at 9,5 duplicate)
+            {c:9,r:1,l:'L',n:3},{c:9,r:2,l:'I'},{c:9,r:3,l:'N'},{c:9,r:4,l:'E'},{c:9,r:5,l:'N'},
+            // 5D: GREY (Y at 11,5 duplicate)
+            {c:11,r:2,l:'G',n:5},{c:11,r:3,l:'R'},{c:11,r:4,l:'E'},{c:11,r:5,l:'Y'},
         ];
 
         let gridBuilt = false;
@@ -419,7 +392,7 @@
                 document.getElementById('cw-error').innerText = '';
                 next(25);
             } else {
-                document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (28-Across) is incorrect or incomplete.';
+                document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (6-Across) is incorrect or incomplete.';
             }
         }
 
