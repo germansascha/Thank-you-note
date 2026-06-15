@@ -132,7 +132,7 @@
             "Finance Man needs your help to find his civilian disguise. Solve the riddle to find the password for the secret location!"
         </p>
         <p style="color: white; font-size: 11px; background: var(--red); padding: 5px; border-radius: 3px; margin-bottom: 15px;">
-            CRITICAL: 6-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
+            CRITICAL: 7-Across is the SECRET PASSWORD. It must be filled correctly to proceed.
         </p>
 
         <div class="cw-container">
@@ -142,20 +142,21 @@
         <div class="clues">
             <div class="clue-col">
                 <h3>ACROSS</h3>
-                <p><b>6.</b> ★ THE SECRET PASSWORD ★<br><em style="font-size:10px;">Finance Man's tailor — fill all 11 boxes</em></p>
+                <p><b>7.</b> ★ THE SECRET PASSWORD ★<br><em style="font-size:10px;">Finance Man's tailor — fill all 11 boxes</em></p>
             </div>
             <div class="clue-col">
                 <h3>DOWN</h3>
-                <p><b>1.</b> Brief star appearance — or a spy's cover role</p>
-                <p><b>2.</b> Arm joint; well-cut sleeves leave room here</p>
-                <p><b>3.</b> Breathable summer suit fabric</p>
-                <p><b>4.</b> Smart outfit, legal action, or to fit perfectly</p>
-                <p><b>5.</b> Classic suit shade — and London's default sky</p>
+                <p><b>1.</b> A tailor's core skill: make it fit</p>
+                <p><b>2.</b> A spy's outer garment — also hides secrets</p>
+                <p><b>3.</b> Temporary stitching to hold fabric — or cooking a turkey</p>
+                <p><b>4.</b> Classic British fabric, beloved by country gents</p>
+                <p><b>5.</b> Smooth inner fabric of a jacket</p>
+                <p><b>6.</b> Do NOT put your bespoke suit in one of these</p>
             </div>
         </div>
 
         <p id="cw-error" style="color: var(--red); font-weight: bold; font-size: 12px; margin-top: 10px;"></p>
-        <button onclick="verifyCrossword()">VERIFY PASSWORD (6-ACROSS)</button>
+        <button onclick="verifyCrossword()">VERIFY PASSWORD (7-ACROSS)</button>
     </div>
 
     <div id="stage25" class="screen hidden">
@@ -251,24 +252,27 @@
             }
         }
 
-        // cwData: mini crossword — 5 down words all ending at the THOMSWEENEY password row
-        // Intersections (verified): SUIT→T, CAMEO→O, ELBOW→W, LINEN→N, GREY→Y
+        // cwData: 6 down words all crossing through THOMSWEENEY at row 3 (the middle row)
+        // Each word: 2 rows above THOMSWEENEY, intersection at row 3, 2 rows below
+        // Intersections verified: ALTER→T(col1), CLOAK→O(col3), BASTE→S(col5), TWEED→E(col7), LINER→N(col9), DRYER→Y(col11)
         const cwData = [
-            // 6A: THOMSWEENEY (listed first so pw cells win dedup at intersections)
-            {c:1,r:5,l:'T',n:6,pw:true},{c:2,r:5,l:'H',pw:true},{c:3,r:5,l:'O',pw:true},
-            {c:4,r:5,l:'M',pw:true},{c:5,r:5,l:'S',pw:true},{c:6,r:5,l:'W',pw:true},
-            {c:7,r:5,l:'E',pw:true},{c:8,r:5,l:'E',pw:true},{c:9,r:5,l:'N',pw:true},
-            {c:10,r:5,l:'E',pw:true},{c:11,r:5,l:'Y',pw:true},
-            // 4D: SUIT (T at 1,5 is duplicate, skipped — T already from 6A above)
-            {c:1,r:2,l:'S',n:4},{c:1,r:3,l:'U'},{c:1,r:4,l:'I'},{c:1,r:5,l:'T'},
-            // 1D: CAMEO (O at 3,5 duplicate)
-            {c:3,r:1,l:'C',n:1},{c:3,r:2,l:'A'},{c:3,r:3,l:'M'},{c:3,r:4,l:'E'},{c:3,r:5,l:'O'},
-            // 2D: ELBOW (W at 6,5 duplicate)
-            {c:6,r:1,l:'E',n:2},{c:6,r:2,l:'L'},{c:6,r:3,l:'B'},{c:6,r:4,l:'O'},{c:6,r:5,l:'W'},
-            // 3D: LINEN (N at 9,5 duplicate)
-            {c:9,r:1,l:'L',n:3},{c:9,r:2,l:'I'},{c:9,r:3,l:'N'},{c:9,r:4,l:'E'},{c:9,r:5,l:'N'},
-            // 5D: GREY (Y at 11,5 duplicate)
-            {c:11,r:2,l:'G',n:5},{c:11,r:3,l:'R'},{c:11,r:4,l:'E'},{c:11,r:5,l:'Y'},
+            // 7A: THOMSWEENEY at row 3 (listed first so pw cells win dedup at intersections)
+            {c:1,r:3,l:'T',n:7,pw:true},{c:2,r:3,l:'H',pw:true},{c:3,r:3,l:'O',pw:true},
+            {c:4,r:3,l:'M',pw:true},{c:5,r:3,l:'S',pw:true},{c:6,r:3,l:'W',pw:true},
+            {c:7,r:3,l:'E',pw:true},{c:8,r:3,l:'E',pw:true},{c:9,r:3,l:'N',pw:true},
+            {c:10,r:3,l:'E',pw:true},{c:11,r:3,l:'Y',pw:true},
+            // 1D: ALTER  A-L-[T]-E-R  (T at col1,r3 is duplicate)
+            {c:1,r:1,l:'A',n:1},{c:1,r:2,l:'L'},{c:1,r:3,l:'T'},{c:1,r:4,l:'E'},{c:1,r:5,l:'R'},
+            // 2D: CLOAK  C-L-[O]-A-K  (O at col3,r3 duplicate)
+            {c:3,r:1,l:'C',n:2},{c:3,r:2,l:'L'},{c:3,r:3,l:'O'},{c:3,r:4,l:'A'},{c:3,r:5,l:'K'},
+            // 3D: BASTE  B-A-[S]-T-E  (S at col5,r3 duplicate)
+            {c:5,r:1,l:'B',n:3},{c:5,r:2,l:'A'},{c:5,r:3,l:'S'},{c:5,r:4,l:'T'},{c:5,r:5,l:'E'},
+            // 4D: TWEED  T-W-[E]-E-D  (E at col7,r3 duplicate)
+            {c:7,r:1,l:'T',n:4},{c:7,r:2,l:'W'},{c:7,r:3,l:'E'},{c:7,r:4,l:'E'},{c:7,r:5,l:'D'},
+            // 5D: LINER  L-I-[N]-E-R  (N at col9,r3 duplicate)
+            {c:9,r:1,l:'L',n:5},{c:9,r:2,l:'I'},{c:9,r:3,l:'N'},{c:9,r:4,l:'E'},{c:9,r:5,l:'R'},
+            // 6D: DRYER  D-R-[Y]-E-R  (Y at col11,r3 duplicate)
+            {c:11,r:1,l:'D',n:6},{c:11,r:2,l:'R'},{c:11,r:3,l:'Y'},{c:11,r:4,l:'E'},{c:11,r:5,l:'R'},
         ];
 
         let gridBuilt = false;
@@ -392,7 +396,7 @@
                 document.getElementById('cw-error').innerText = '';
                 next(25);
             } else {
-                document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (6-Across) is incorrect or incomplete.';
+                document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (7-Across) is incorrect or incomplete.';
             }
         }
 
