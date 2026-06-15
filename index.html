@@ -47,11 +47,12 @@
 
         /* CROSSWORD SPECIFICS */
         .cw-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 0; margin-bottom: 20px; }
-        .cw-grid { position: relative; width: 672px; height: 562px; background: #000; border: 2px solid #444; flex-shrink: 0; margin: 0 auto; }
-        .cw-cell { position: absolute; background: #fff; width: 22px; height: 22px; border: 1px solid #bbb; box-sizing: border-box; }
+        .cw-grid { display: grid; gap: 1px; background: #000; border: 2px solid #333; width: max-content; margin: 0 auto; }
+        .cw-cell { background: #fff; width: 22px; height: 22px; position: relative; }
+        .cw-cell-black { background: #111; width: 22px; height: 22px; }
         /* Font size MUST be 16px to prevent iOS Safari auto-zoom on tap */
         .cw-cell input { position: absolute; top:0; left:0; width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; border-radius: 0; padding: 0; color: black; background: transparent; outline: none; }
-        .cw-num { position: absolute; top: 1px; left: 1px; font-size: 7px; font-weight: bold; color: #333; z-index: 2; pointer-events: none; line-height: 1; }
+        .cw-num { position: absolute; top: 1px; left: 1px; font-size: 6px; font-weight: bold; color: #333; z-index: 2; pointer-events: none; line-height: 1; }
 
         /* PASSWORD ROW PULSE */
         @keyframes pwPulse { 0%,100% { background: #fffde7; } 50% { background: #fff9c4; } }
@@ -300,67 +301,91 @@
         let gridBuilt = false;
         function buildGrid() {
             const grid = document.getElementById('cw-grid');
-            const cellMap = {};
-            const seen = new Set();
+            grid.innerHTML = '';
 
+            // First-occurrence wins at intersections (across words listed first in cwData)
+            const activeMap = new Map();
+            const seen = new Set();
             cwData.forEach(cell => {
                 const key = cell.c + ',' + cell.r;
-                if(seen.has(key)) return; // first occurrence wins entirely
-                seen.add(key);
-
-                let div = document.createElement('div');
-                div.className = 'cw-cell';
-                // Stride = 22px (cell width, no gap) — adjacent cells touch directly
-                div.style.left = ((cell.c - 1) * 22 + 4) + 'px';
-                div.style.top  = ((cell.r - 1) * 22 + 4) + 'px';
-                if(cell.pw) div.classList.add('pw-row'); // only true THOMSWEENEY cells
-
-                let input = document.createElement('input');
-                input.maxLength = 1;
-                input.dataset.ans = cell.l;
-                input.dataset.row = String(cell.r);
-                input.dataset.col = String(cell.c);
-                if(cell.pw) input.dataset.pw = '1'; // used by verifyCrossword
-                input.setAttribute('enterkeyhint', 'next');
-                input.setAttribute('autocomplete', 'off');
-                input.setAttribute('autocorrect', 'off');
-                input.setAttribute('autocapitalize', 'characters');
-
-                if(cell.n) {
-                    let num = document.createElement('span');
-                    num.className = 'cw-num';
-                    num.innerText = cell.n;
-                    div.appendChild(num);
-                }
-                div.appendChild(input);
-                grid.appendChild(div);
-                cellMap[key] = input;
+                if (!seen.has(key)) { seen.add(key); activeMap.set(key, cell); }
             });
 
-            // Word-aware navigation using grid coordinates
+            // Bounding box of all letter cells
+            const allC = cwData.map(d => d.c), allR = cwData.map(d => d.r);
+            const minC = Math.min(...allC), maxC = Math.max(...allC);
+            const minR = Math.min(...allR), maxR = Math.max(...allR);
+            const numCols = maxC - minC + 1;
+            const numRows = maxR - minR + 1;
+
+            grid.style.gridTemplateColumns = `repeat(${numCols}, 22px)`;
+            grid.style.gridTemplateRows    = `repeat(${numRows}, 22px)`;
+
+            const cellMap = {};
+
+            // Render every position in the bounding box: white input cell or solid black filler
+            for (let r = minR; r <= maxR; r++) {
+                for (let c = minC; c <= maxC; c++) {
+                    const key = c + ',' + r;
+                    const div = document.createElement('div');
+
+                    if (activeMap.has(key)) {
+                        const cell = activeMap.get(key);
+                        div.className = 'cw-cell' + (cell.pw ? ' pw-row' : '');
+
+                        if (cell.n) {
+                            const num = document.createElement('span');
+                            num.className = 'cw-num';
+                            num.textContent = cell.n;
+                            div.appendChild(num);
+                        }
+
+                        const input = document.createElement('input');
+                        input.maxLength = 1;
+                        input.dataset.ans = cell.l;
+                        input.dataset.row = String(r);
+                        input.dataset.col = String(c);
+                        if (cell.pw) input.dataset.pw = '1';
+                        input.setAttribute('enterkeyhint', 'next');
+                        input.setAttribute('autocomplete', 'off');
+                        input.setAttribute('autocorrect', 'off');
+                        input.setAttribute('autocapitalize', 'characters');
+
+                        div.appendChild(input);
+                        cellMap[key] = input;
+                    } else {
+                        div.className = 'cw-cell-black';
+                    }
+
+                    grid.appendChild(div);
+                }
+            }
+
+            // Keyboard navigation between cells
             Object.values(cellMap).forEach(input => {
                 input.addEventListener('input', function() {
                     this.style.background = 'transparent';
-                    if(this.value.length === 1) {
+                    if (this.value.length === 1) {
                         const c = parseInt(this.dataset.col);
                         const r = parseInt(this.dataset.row);
-                        const nextAcross = cellMap[(c + 1) + ',' + r];
-                        if(nextAcross) { nextAcross.focus(); return; }
-                        const nextDown = cellMap[c + ',' + (r + 1)];
-                        if(nextDown) nextDown.focus();
+                        const nextAcross = cellMap[(c+1) + ',' + r];
+                        if (nextAcross) { nextAcross.focus(); return; }
+                        const nextDown = cellMap[c + ',' + (r+1)];
+                        if (nextDown) nextDown.focus();
                     }
                 });
                 input.addEventListener('keydown', function(e) {
-                    if(e.key === 'Backspace' && this.value === '') {
+                    if (e.key === 'Backspace' && this.value === '') {
                         const c = parseInt(this.dataset.col);
                         const r = parseInt(this.dataset.row);
-                        const prevAcross = cellMap[(c - 1) + ',' + r];
-                        if(prevAcross) { prevAcross.focus(); return; }
-                        const prevDown = cellMap[c + ',' + (r - 1)];
-                        if(prevDown) prevDown.focus();
+                        const prevAcross = cellMap[(c-1) + ',' + r];
+                        if (prevAcross) { prevAcross.focus(); return; }
+                        const prevDown = cellMap[c + ',' + (r-1)];
+                        if (prevDown) prevDown.focus();
                     }
                 });
             });
+
             gridBuilt = true;
         }
 
