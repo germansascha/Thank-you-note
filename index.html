@@ -63,10 +63,9 @@
         @keyframes cwShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
         .cw-cell.shake { animation: cwShake 0.4s ease; }
 
-        .clues { text-align: left; font-size: 11px; color: #ccc; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
-        .clue-col { width: 48%; }
+        .clues { text-align: left; font-size: 12px; color: #ccc; }
+        .clue-col { width: 100%; }
         .clue-col h3 { color: var(--gold); font-size: 12px; margin-bottom: 5px; border-bottom: 1px solid #333; }
-        .clue-col p { margin: 3px 0; }
 
         /* STAGE 3: MANUFACTURING */
         .swatch-group { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
@@ -142,21 +141,19 @@
         <div class="clues">
             <div class="clue-col">
                 <h3>ACROSS</h3>
-                <p><b>12.</b> ★ THE SECRET PASSWORD ★<br><em style="font-size:10px;">Finance Man's tailor — fill all 11 boxes</em></p>
-            </div>
-            <div class="clue-col">
-                <h3>DOWN</h3>
-                <p><b>1.</b> Finance Man didn't need this — Tom nailed it first try</p>
-                <p><b>2.</b> Finance Man's exact colour when he saw the bill</p>
-                <p><b>3.</b> What a spy hides under — Finance Man's version has silk lining</p>
-                <p><b>4.</b> Bond's first name — Finance Man chose it as his spy codename</p>
-                <p><b>5.</b> Gillian does it to the turkey; Tom does it to the suit (not the same thing)</p>
-                <p><b>6.</b> What the suit gives Finance Man in the boardroom — confirmed by all witnesses</p>
-                <p><b>7.</b> Scratchy country fabric that Tom heroically talked Finance Man out of</p>
-                <p><b>8.</b> How Tom presses the suit — also Gillian's reaction to the receipt</p>
-                <p><b>9.</b> The silky inside of the jacket that Finance Man strokes when no one's watching</p>
-                <p><b>10.</b> What Tom did before Finance Man — purely professional, for trouser length</p>
-                <p><b>11.</b> Finance Man's greatest domestic fear</p>
+                <p><b>12.</b> ★ THE SECRET PASSWORD ★ — Finance Man's tailor (11 letters)</p>
+                <h3 style="margin-top:10px;">DOWN</h3>
+                <p><b>1.</b> I will definitely not look like a "___ kacker" / To make a structural adjustment to a garment</p>
+                <p><b>2.</b> With this suave suit I might look as cool as this famous 90s singer / Someone who guides you to your seat at a theater</p>
+                <p><b>3.</b> What you both thoroughly managed to do to me for this birthday / To accidentally reveal a movie's ending</p>
+                <p><b>4.</b> The inevitable gossip around the office that I've hired a professional stylist / An unverified story spread by word of mouth</p>
+                <p><b>5.</b> The impeccable sense of design Charlotte had in helping choose the fabric / The sense required to appreciate a perfect chicken soup</p>
+                <p><b>6.</b> What I feel walking into the boardroom in the new suit / What I feel sticking a fork into the outlet</p>
+                <p><b>7.</b> A classic Scottish woven fabric — lovely, but nowhere near as sharp as what you picked / Rough woolen cloth associated with the Highlands</p>
+                <p><b>8.</b> What might come whistling out of my ears if someone spills coffee on this masterpiece / Hot water vapor used to press out wrinkles</p>
+                <p><b>9.</b> What I will absolutely be doing in this jacket at the very next family Simcha / Rhythmic movement to music</p>
+                <p><b>10.</b> Exactly how I feel walking out the door in my incredible birthday gift / Smooth, glossy, and streamlined</p>
+                <p><b>11.</b> Something I finally possess, entirely thanks to your generosity / Elegance and sophistication in dress</p>
             </div>
         </div>
 
@@ -259,7 +256,7 @@
 
         // cwData: 11 down words, one per column, each crossing THOMSWEENEY at row 3
         // Solving all 11 down clues reveals every letter of the 11-letter password
-        // Intersections: ALTER→T, ASHEN→H, CLOAK→O, JAMES→M, BASTE→S, POWER→W, TWEED→E, STEAM→E, LINER→N, KNEEL→E, DRYER→Y
+        // Intersections: ALTER→T, USHER→H, SPOIL→O, RUMOR→M, TASTE→S, POWER→W, TWEED→E, STEAM→E, DANCE→N, SLEEK→E, STYLE→Y
         const cwData = [
             // 12A: THOMSWEENEY (r:3, listed first so pw cells win dedup at intersections)
             {c:1,r:3,l:'T',n:12,pw:true},{c:2,r:3,l:'H',pw:true},{c:3,r:3,l:'O',pw:true},
@@ -268,26 +265,26 @@
             {c:10,r:3,l:'E',pw:true},{c:11,r:3,l:'Y',pw:true},
             // 1D: ALTER  A-L-[T]-E-R
             {c:1,r:1,l:'A',n:1},{c:1,r:2,l:'L'},{c:1,r:3,l:'T'},{c:1,r:4,l:'E'},{c:1,r:5,l:'R'},
-            // 2D: ASHEN  A-S-[H]-E-N
-            {c:2,r:1,l:'A',n:2},{c:2,r:2,l:'S'},{c:2,r:3,l:'H'},{c:2,r:4,l:'E'},{c:2,r:5,l:'N'},
-            // 3D: CLOAK  C-L-[O]-A-K
-            {c:3,r:1,l:'C',n:3},{c:3,r:2,l:'L'},{c:3,r:3,l:'O'},{c:3,r:4,l:'A'},{c:3,r:5,l:'K'},
-            // 4D: JAMES  J-A-[M]-E-S
-            {c:4,r:1,l:'J',n:4},{c:4,r:2,l:'A'},{c:4,r:3,l:'M'},{c:4,r:4,l:'E'},{c:4,r:5,l:'S'},
-            // 5D: BASTE  B-A-[S]-T-E
-            {c:5,r:1,l:'B',n:5},{c:5,r:2,l:'A'},{c:5,r:3,l:'S'},{c:5,r:4,l:'T'},{c:5,r:5,l:'E'},
+            // 2D: USHER  U-S-[H]-E-R
+            {c:2,r:1,l:'U',n:2},{c:2,r:2,l:'S'},{c:2,r:3,l:'H'},{c:2,r:4,l:'E'},{c:2,r:5,l:'R'},
+            // 3D: SPOIL  S-P-[O]-I-L
+            {c:3,r:1,l:'S',n:3},{c:3,r:2,l:'P'},{c:3,r:3,l:'O'},{c:3,r:4,l:'I'},{c:3,r:5,l:'L'},
+            // 4D: RUMOR  R-U-[M]-O-R
+            {c:4,r:1,l:'R',n:4},{c:4,r:2,l:'U'},{c:4,r:3,l:'M'},{c:4,r:4,l:'O'},{c:4,r:5,l:'R'},
+            // 5D: TASTE  T-A-[S]-T-E
+            {c:5,r:1,l:'T',n:5},{c:5,r:2,l:'A'},{c:5,r:3,l:'S'},{c:5,r:4,l:'T'},{c:5,r:5,l:'E'},
             // 6D: POWER  P-O-[W]-E-R
             {c:6,r:1,l:'P',n:6},{c:6,r:2,l:'O'},{c:6,r:3,l:'W'},{c:6,r:4,l:'E'},{c:6,r:5,l:'R'},
             // 7D: TWEED  T-W-[E]-E-D
             {c:7,r:1,l:'T',n:7},{c:7,r:2,l:'W'},{c:7,r:3,l:'E'},{c:7,r:4,l:'E'},{c:7,r:5,l:'D'},
             // 8D: STEAM  S-T-[E]-A-M
             {c:8,r:1,l:'S',n:8},{c:8,r:2,l:'T'},{c:8,r:3,l:'E'},{c:8,r:4,l:'A'},{c:8,r:5,l:'M'},
-            // 9D: LINER  L-I-[N]-E-R
-            {c:9,r:1,l:'L',n:9},{c:9,r:2,l:'I'},{c:9,r:3,l:'N'},{c:9,r:4,l:'E'},{c:9,r:5,l:'R'},
-            // 10D: KNEEL  K-N-[E]-E-L
-            {c:10,r:1,l:'K',n:10},{c:10,r:2,l:'N'},{c:10,r:3,l:'E'},{c:10,r:4,l:'E'},{c:10,r:5,l:'L'},
-            // 11D: DRYER  D-R-[Y]-E-R
-            {c:11,r:1,l:'D',n:11},{c:11,r:2,l:'R'},{c:11,r:3,l:'Y'},{c:11,r:4,l:'E'},{c:11,r:5,l:'R'},
+            // 9D: DANCE  D-A-[N]-C-E
+            {c:9,r:1,l:'D',n:9},{c:9,r:2,l:'A'},{c:9,r:3,l:'N'},{c:9,r:4,l:'C'},{c:9,r:5,l:'E'},
+            // 10D: SLEEK  S-L-[E]-E-K
+            {c:10,r:1,l:'S',n:10},{c:10,r:2,l:'L'},{c:10,r:3,l:'E'},{c:10,r:4,l:'E'},{c:10,r:5,l:'K'},
+            // 11D: STYLE  S-T-[Y]-L-E
+            {c:11,r:1,l:'S',n:11},{c:11,r:2,l:'T'},{c:11,r:3,l:'Y'},{c:11,r:4,l:'L'},{c:11,r:5,l:'E'},
         ];
 
         let gridBuilt = false;
