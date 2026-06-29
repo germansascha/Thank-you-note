@@ -67,9 +67,15 @@
         .clue-col { width: 100%; }
         .clue-col h3 { color: var(--gold); font-size: 12px; margin-bottom: 5px; border-bottom: 1px solid #333; }
 
-        /* STAGE 3: MANUFACTURING */
-        .swatch-group { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
-        .swatch { width: 75px; height: 75px; border: 1px solid #444; cursor: pointer; background-size: cover; border-radius: 4px; display: inline-block; margin: 5px; }
+        /* STAGE 3: SWATCH BOOK */
+        .swatch-book { margin: 15px 0; }
+        .swatch-nav { display: flex; align-items: center; justify-content: center; gap: 14px; }
+        .swatch-arrow { width: 48px !important; height: 52px; font-size: 22px; padding: 0; flex-shrink: 0; }
+        .swatch-large { width: 180px; height: 180px; border: 2px solid var(--gold); background-size: cover; background-position: center; border-radius: 4px; flex-shrink: 0; }
+        .swatch-dots { display: flex; justify-content: center; gap: 10px; margin: 10px 0 4px; }
+        .swatch-dot { width: 9px; height: 9px; border-radius: 50%; background: #444; cursor: pointer; }
+        .swatch-dot.active { background: var(--gold); }
+        .swatch-label { font-family: 'Special Elite'; color: var(--gold); font-size: 12px; letter-spacing: 1px; margin: 2px 0 12px; }
         .progress-container { width: 100%; background: #222; height: 12px; margin: 15px 0; border-radius: 6px; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
 
@@ -118,7 +124,7 @@
         <h2>INCOMING TRANSMISSION</h2>
         <h1>SITUATION REPORT</h1>
         <video id="openingVideo" width="100%" playsinline controls>
-            <source src="gemini_generated_video_1900954D.mp4" type="video/mp4">
+            <source src="gemini_generated_video_74A666E8.mp4" type="video/mp4">
         </video>
         <button onclick="next(2)">PROCEED TO HQ</button>
     </div>
@@ -166,7 +172,7 @@
         <h2>TRANSMISSION RECEIVED</h2>
         <h1>PASSWORD ACCEPTED</h1>
         <video id="transitionVideo" width="100%" playsinline controls>
-            <source src="gemini_generated_video_84D70B81.mp4" type="video/mp4">
+            <source src="gemini_generated_video_B5915804.mp4" type="video/mp4">
         </video>
         <button onclick="next(3)">ENTER TAILOR SHOP FACILITIES</button>
     </div>
@@ -179,10 +185,15 @@
             "You've successfully accessed the secret disguise maker facilities! Help us select and create the best one."
         </p>
 
-        <div class="swatch-group">
-            <div class="swatch" style="background-image: url('IMG_0146.jpeg')" onclick="reject(this, 'REJECTED: Tartan is too loud. Operational security compromised.')"></div>
-            <div class="swatch" style="background-image: url('IMG_0145.jpeg')" onclick="startSewing()"></div>
-            <div class="swatch" style="background-image: url('IMG_0147.webp')" onclick="reject(this, 'REJECTED: Security risk. Fabric traced to enemy asset.')"></div>
+        <div class="swatch-book">
+            <div class="swatch-nav">
+                <button class="swatch-arrow" onclick="swatchNav(-1)">&#9664;</button>
+                <div class="swatch-large" id="swatch-display"></div>
+                <button class="swatch-arrow" onclick="swatchNav(1)">&#9654;</button>
+            </div>
+            <div class="swatch-dots" id="swatch-dots"></div>
+            <p class="swatch-label" id="swatch-label"></p>
+            <button onclick="chooseSwatch()">SELECT THIS FABRIC</button>
         </div>
 
         <div id="sew-zone" class="hidden">
@@ -201,8 +212,8 @@
         <h1>Armor Alignment</h1>
         <div id="suit-up-stage">
             <img src="IMG_0151.png" id="char-body" alt="Character Base Body">
-            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:50%; left:20%; width:60%;" alt="Trousers">
-            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:-2%; left:12%; width:76%;" alt="Jacket">
+            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:58%; left:10%; width:80%;" alt="Trousers">
+            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:20%; left:5%; width:90%;" alt="Jacket">
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)" alt="Trousers Icon">
@@ -224,7 +235,7 @@
         </div>
         <div id="video-container" class="hidden">
             <video id="revealVideo" width="100%" playsinline controls>
-                <source src="gemini_generated_video_958E6D40.mp4" type="video/mp4">
+                <source src="gemini_generated_video_13E8BBF2.mp4" type="video/mp4">
             </video>
             <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">"THANK YOU GILLIAN AND WAYNE FOR THE INCREDIBLE GIFT!"</p>
         </div>
@@ -242,6 +253,7 @@
             el.classList.add('fade-in');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if(n === 2 && !gridBuilt) buildGrid();
+            if(n === 3) { swatchIdx = 0; renderSwatch(); }
             const h1 = el.querySelector('h1');
             if(h1) typewriter(h1);
         }
@@ -350,27 +362,27 @@
                 }
             }
 
-            // Keyboard navigation between cells
+            // Keyboard navigation between cells — moves DOWN after each letter (all words are Down)
             Object.values(cellMap).forEach(input => {
                 input.addEventListener('input', function() {
                     this.style.background = 'transparent';
                     if (this.value.length === 1) {
                         const c = parseInt(this.dataset.col);
                         const r = parseInt(this.dataset.row);
-                        const nextAcross = cellMap[(c+1) + ',' + r];
-                        if (nextAcross) { nextAcross.focus(); return; }
                         const nextDown = cellMap[c + ',' + (r+1)];
-                        if (nextDown) nextDown.focus();
+                        if (nextDown) { nextDown.focus(); return; }
+                        const nextAcross = cellMap[(c+1) + ',' + r];
+                        if (nextAcross) nextAcross.focus();
                     }
                 });
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value === '') {
                         const c = parseInt(this.dataset.col);
                         const r = parseInt(this.dataset.row);
-                        const prevAcross = cellMap[(c-1) + ',' + r];
-                        if (prevAcross) { prevAcross.focus(); return; }
                         const prevDown = cellMap[c + ',' + (r-1)];
-                        if (prevDown) prevDown.focus();
+                        if (prevDown) { prevDown.focus(); return; }
+                        const prevAcross = cellMap[(c-1) + ',' + r];
+                        if (prevAcross) prevAcross.focus();
                     }
                 });
             });
@@ -409,6 +421,41 @@
                 next(25);
             } else {
                 document.getElementById('cw-error').innerText = 'ERROR: The Secret Password (12-Across) is incorrect or incomplete.';
+            }
+        }
+
+        const SWATCHES = [
+            { img: 'IMG_0146.jpeg', name: 'HIGHLAND TARTAN', reject: 'REJECTED: Tartan is too loud. Operational security compromised.' },
+            { img: 'IMG_0145.jpeg', name: 'CHARCOAL WOOL BLEND', reject: null },
+            { img: 'IMG_0147.webp', name: 'PATTERN #7 — ORIGIN UNKNOWN', reject: 'REJECTED: Security risk. Fabric traced to enemy asset.' },
+        ];
+        let swatchIdx = 0;
+
+        function renderSwatch() {
+            const s = SWATCHES[swatchIdx];
+            document.getElementById('swatch-display').style.backgroundImage = `url('${s.img}')`;
+            document.getElementById('swatch-label').textContent = s.name;
+            document.getElementById('swatch-dots').innerHTML = SWATCHES.map((_, i) =>
+                `<div class="swatch-dot${i===swatchIdx?' active':''}" onclick="swatchGo(${i})"></div>`
+            ).join('');
+            document.getElementById('rejection-msg').classList.remove('show');
+        }
+
+        function swatchNav(dir) {
+            swatchIdx = (swatchIdx + dir + SWATCHES.length) % SWATCHES.length;
+            renderSwatch();
+        }
+
+        function swatchGo(i) { swatchIdx = i; renderSwatch(); }
+
+        function chooseSwatch() {
+            const s = SWATCHES[swatchIdx];
+            if (s.reject) {
+                const rm = document.getElementById('rejection-msg');
+                rm.innerText = '[ INTEL REPORT ] ' + s.reject;
+                rm.classList.add('show');
+            } else {
+                startSewing();
             }
         }
 
