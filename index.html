@@ -90,7 +90,8 @@
 
         /* STAGE 4: SUIT UP */
         #suit-up-stage { position: relative; width: 280px; height: 400px; margin: 0 auto; background: #111; border: 1px solid #333; overflow: hidden; }
-        #suit-up-stage img { position: absolute; width: 100%; height: 100%; object-fit: contain; left: 0; }
+        #suit-up-stage img { position: absolute; left: 0; top: 0; }
+        #char-body { width: 100%; height: 100%; object-fit: contain; }
         .fitted { opacity: 0; transition: opacity 0.5s; pointer-events: none; }
         .fitted.visible { opacity: 1; }
         .inventory { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
@@ -212,8 +213,8 @@
         <h1>Armor Alignment</h1>
         <div id="suit-up-stage">
             <img src="IMG_0151.png" id="char-body" alt="Character Base Body">
-            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:58%; left:10%; width:80%;" alt="Trousers">
-            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:20%; left:5%; width:90%;" alt="Jacket">
+            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:58%; left:20%; width:50%; height:auto;" alt="Trousers">
+            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:25%; left:17%; width:66%; height:auto;" alt="Jacket">
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)" alt="Trousers Icon">
