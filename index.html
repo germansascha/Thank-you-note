@@ -76,8 +76,11 @@
         .swatch-dot { width: 9px; height: 9px; border-radius: 50%; background: #444; cursor: pointer; }
         .swatch-dot.active { background: var(--gold); }
         .swatch-label { font-family: 'Special Elite'; color: var(--gold); font-size: 12px; letter-spacing: 1px; margin: 2px 0 12px; }
-        .progress-container { width: 100%; background: #222; height: 12px; margin: 15px 0; border-radius: 6px; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width 0.1s; }
+        /* SEW PREVIEW — woven reveal */
+        #sew-preview { position: relative; width: 100px; height: 140px; margin: 8px auto; background: #111; overflow: hidden; }
+        #sew-body-img { position: absolute; width: 100%; height: 100%; object-fit: contain; top: 0; left: 0; }
+        #sew-jacket-img { position: absolute; top: 25%; left: 17%; width: 66%; height: auto; clip-path: inset(0 0 100% 0); transition: clip-path 0.3s ease; }
+        #sew-trousers-img { position: absolute; top: 58%; left: 20%; width: 50%; height: auto; clip-path: inset(0 0 100% 0); transition: clip-path 0.3s ease; }
 
         /* SEW BUTTON BOUNCE */
         @keyframes sewBounce { 0%,100% { transform: scale(1); } 40% { transform: scale(0.92); } 70% { transform: scale(1.05); } }
@@ -102,6 +105,17 @@
         @keyframes invShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-5px); } 40%,80% { transform: translateX(5px); } }
         .inv-item.rejected { animation: invShake 0.4s ease; border-color: var(--red) !important; }
 
+        /* INVENTORY INTEL BANNER */
+        #inv-msg { font-size: 11px; color: #ccc; font-family: 'Special Elite'; letter-spacing: 1px; background: rgba(230,57,70,0.12); border: 1px solid var(--red); border-radius: 3px; padding: 8px 12px; margin-top: 10px; display: none; text-align: left; line-height: 1.6; }
+        #inv-msg.show { display: block; }
+
+        /* WRONG ITEMS PULSE */
+        @keyframes suspPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(230,57,70,0); border-color: #444; } 50% { box-shadow: 0 0 8px 3px rgba(230,57,70,0.55); border-color: var(--red); } }
+        .inv-item.suspicious { animation: suspPulse 2s ease-in-out infinite; }
+
+        /* REJECTION FLASH (swatch already-rejected click) */
+        @keyframes rejectFlash { 0%,100% { background: rgba(230,57,70,0.12); } 50% { background: rgba(230,57,70,0.38); } }
+
         /* VIDEO STYLING */
         video { border: 2px solid var(--gold); background: #000; border-radius: 4px; }
     </style>
@@ -112,10 +126,10 @@
 
     <div id="stage1" class="screen">
         <p class="mission-progress">MISSION STATUS: ACCESS</p>
-        <img src="IMG_6441.jpeg" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px;" alt="Finance Man Headshot">
-        <h2>MI6 HQ LOGIN</h2>
-        <h1>Finance Man identified</h1>
-        <p>IDENTIFICATION REQUIRED TO ACCESS <br>CLASSIFIED RECOVERY LOGS.</p>
+        <img src="IMG_0151.png" style="width: 80px; height: 80px; object-fit: cover; object-position: 50% 5%; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px;" alt="Finance Man">
+        <h2>COMMAND CENTRAL — AUTHENTICATION</h2>
+        <h1>Finance Man, is that you?</h1>
+        <p>CLEARANCE REQUIRED TO ACCESS<br>CLASSIFIED MISSION FILES.</p>
         <input type="password" id="pass" class="password" placeholder="ENTER PASSWORD" enterkeyhint="done" onkeydown="if(event.key==='Enter')checkPass()">
         <button onclick="checkPass()">AUTHENTICATE</button>
     </div>
@@ -201,8 +215,12 @@
             <img src="IMG_0156.gif" style="width: 150px; border: 1px solid var(--gold); border-radius: 4px;" alt="Sewing Machine">
             <p>MASH THE BUTTON — FASTER, AGENT!</p>
             <div id="sew-msg"></div>
+            <div id="sew-preview">
+                <img src="IMG_0151.png" id="sew-body-img" alt="">
+                <img src="IMG_0154.png" id="sew-jacket-img" alt="">
+                <img src="IMG_0155.png" id="sew-trousers-img" alt="">
+            </div>
             <button id="sew-btn" onclick="doSew()">STITCH ARMOR</button>
-            <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         </div>
         <div id="rejection-msg"></div>
     </div>
@@ -218,12 +236,13 @@
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)" alt="Trousers Icon">
-            <img src="IMG_6516.png" class="inv-item" onclick="rejectItem(this, 'REJECTED: Finance Man is not going for the Midtown tech-bro look.')" alt="Vest">
+            <img src="IMG_6516.png" class="inv-item wrong" onclick="rejectItem(this, 'Finance Man is not going for the Midtown tech-bro look. Vest logged as threat.')" alt="Vest">
             <img src="IMG_0154.png" class="inv-item" onclick="equip('jacket', this)" alt="Jacket Icon">
-            <img src="IMG_0142.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Potassium levels too high. Bananas are not tactical.')" alt="Banana">
-            <img src="IMG_0143.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Stealth compromised. Clown pants detected by satellite.')" alt="Clown Pants">
-            <img src="IMG_0144.jpeg" class="inv-item" onclick="rejectItem(this, 'REJECTED: Too heavy for modern espionage. Finance Man cannot run.')" alt="Armor">
+            <img src="IMG_0142.jpeg" class="inv-item wrong" onclick="rejectItem(this, 'Potassium levels too high. Bananas are not tactical field equipment.')" alt="Banana">
+            <img src="IMG_0143.jpeg" class="inv-item wrong" onclick="rejectItem(this, 'Stealth compromised. Clown pants detected by three satellites simultaneously.')" alt="Clown Pants">
+            <img src="IMG_0144.jpeg" class="inv-item wrong" onclick="rejectItem(this, 'Too heavy for modern espionage. Finance Man cannot run, sit, or hail a cab.')" alt="Armor">
         </div>
+        <div id="inv-msg"></div>
         <button id="final-btn" class="hidden" onclick="next(5)">FINALIZE DEPLOYMENT</button>
     </div>
 
@@ -254,7 +273,25 @@
             el.classList.add('fade-in');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if(n === 2 && !gridBuilt) buildGrid();
-            if(n === 3) { swatchIdx = 0; renderSwatch(); }
+            if(n === 3) {
+                swatchIdx = 0; renderSwatch();
+                sewClicks = 0;
+                document.getElementById('sew-btn').disabled = false;
+                document.getElementById('sew-jacket-img').style.clipPath = 'inset(0 0 100% 0)';
+                document.getElementById('sew-trousers-img').style.clipPath = 'inset(0 0 100% 0)';
+                document.getElementById('sew-msg').innerText = '';
+                document.getElementById('sew-zone').classList.add('hidden');
+            }
+            if(n === 4) {
+                gear = 0;
+                document.getElementById('final-btn').classList.add('hidden');
+                document.querySelectorAll('.inv-item.wrong').forEach(el => el.classList.remove('suspicious'));
+                document.querySelectorAll('.inv-item').forEach(el => el.classList.remove('used'));
+                document.getElementById('fit-jacket').classList.remove('visible');
+                document.getElementById('fit-trousers').classList.remove('visible');
+                document.getElementById('inv-msg').classList.remove('show');
+                setTimeout(initInventoryScan, 700);
+            }
             const h1 = el.querySelector('h1');
             if(h1) typewriter(h1);
         }
@@ -426,20 +463,55 @@
         }
 
         const SWATCHES = [
-            { img: 'IMG_0146.jpeg', name: 'HIGHLAND TARTAN', reject: 'REJECTED: Tartan is too loud. Operational security compromised.' },
+            { img: 'IMG_0146.jpeg', name: 'HIGHLAND TARTAN',
+              reject: 'Cannot wear this without a bagpipe escort. You\'d be spotted from orbit — and by every shepherd in a 5-mile radius.' },
+            { bgImg: 'repeating-linear-gradient(45deg, #000 0, #000 11px, #fff 11px, #fff 22px)', bgColor: '#fff',
+              name: 'NEON ZEBRA CREPE',
+              reject: 'Too memorable for a covert operation. Satellite imaging flagged it in 0.3 seconds.' },
+            { img: 'IMG_0147.webp', name: 'PATTERN #7 — ORIGIN UNKNOWN',
+              reject: 'Fabric traced to an enemy asset. Do NOT touch the swatch. Step away slowly.' },
             { img: 'IMG_0145.jpeg', name: 'CHARCOAL WOOL BLEND', reject: null },
-            { img: 'IMG_0147.webp', name: 'PATTERN #7 — ORIGIN UNKNOWN', reject: 'REJECTED: Security risk. Fabric traced to enemy asset.' },
+            { bgImg: 'radial-gradient(ellipse at 20% 30%, #556B2F 0%, #556B2F 28%, transparent 28%), radial-gradient(ellipse at 72% 65%, #8B7355 0%, #8B7355 22%, transparent 22%), radial-gradient(ellipse at 78% 15%, #3D5A3E 0%, #3D5A3E 30%, transparent 30%), radial-gradient(ellipse at 30% 78%, #6B8E23 0%, #6B8E23 26%, transparent 26%)',
+              bgColor: '#4a5240', name: 'MILITARY CAMO SILK',
+              reject: 'This is not that kind of mission. Also, silk camo is not a thing. It has never been a thing.' },
+            { bgImg: 'linear-gradient(rgba(160,160,160,0.55) 1px, transparent 1px), linear-gradient(90deg, rgba(160,160,160,0.55) 1px, transparent 1px)',
+              bgSize: '10px 10px', bgColor: '#909090', name: 'CHAIN MAIL TECHWEAVE™',
+              reject: 'Finance Man cannot run, sit, breathe, or hail a cab in this. Mission terminated before it begins.' },
+            { bgImg: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffa0b4 100%)', bgColor: '#fecfef',
+              name: 'CHERRY BLOSSOM SATIN',
+              reject: 'Beautiful, but Finance Man is not a cherry blossom. Intelligence file gracefully declined.' },
         ];
         let swatchIdx = 0;
 
         function renderSwatch() {
             const s = SWATCHES[swatchIdx];
-            document.getElementById('swatch-display').style.backgroundImage = `url('${s.img}')`;
+            const display = document.getElementById('swatch-display');
+            if (s.img) {
+                display.style.backgroundImage = `url('${s.img}')`;
+                display.style.backgroundSize = 'cover';
+                display.style.backgroundPosition = 'center';
+                display.style.backgroundColor = '';
+            } else {
+                display.style.backgroundImage = s.bgImg;
+                display.style.backgroundSize = s.bgSize || 'auto';
+                display.style.backgroundPosition = 'center';
+                display.style.backgroundColor = s.bgColor || '#111';
+            }
             document.getElementById('swatch-label').textContent = s.name;
             document.getElementById('swatch-dots').innerHTML = SWATCHES.map((_, i) =>
                 `<div class="swatch-dot${i===swatchIdx?' active':''}" onclick="swatchGo(${i})"></div>`
             ).join('');
-            document.getElementById('rejection-msg').classList.remove('show');
+            const rm = document.getElementById('rejection-msg');
+            rm.style.animation = '';
+            rm.classList.remove('show');
+            if (s.reject) {
+                setTimeout(() => {
+                    if (SWATCHES[swatchIdx] === s) {
+                        rm.innerText = '[ INTEL REPORT ] ' + s.reject;
+                        rm.classList.add('show');
+                    }
+                }, 500);
+            }
         }
 
         function swatchNav(dir) {
@@ -453,8 +525,14 @@
             const s = SWATCHES[swatchIdx];
             if (s.reject) {
                 const rm = document.getElementById('rejection-msg');
-                rm.innerText = '[ INTEL REPORT ] ' + s.reject;
-                rm.classList.add('show');
+                if (rm.classList.contains('show')) {
+                    rm.style.animation = 'none';
+                    void rm.offsetWidth;
+                    rm.style.animation = 'rejectFlash 0.5s ease';
+                } else {
+                    rm.innerText = '[ INTEL REPORT ] ' + s.reject;
+                    rm.classList.add('show');
+                }
             } else {
                 startSewing();
             }
@@ -480,8 +558,14 @@
         function doSew() {
             if(sewClicks >= SEW_TOTAL) return;
             sewClicks++;
-            const pct = Math.round((sewClicks / SEW_TOTAL) * 100);
-            document.getElementById('progress-bar').style.width = pct + '%';
+
+            // Jacket woven in clicks 1-4, trousers in clicks 5-7
+            const JACKET_CLICKS = 4;
+            const jacketReveal = Math.min(1, sewClicks / JACKET_CLICKS);
+            const trousersReveal = sewClicks > JACKET_CLICKS ? (sewClicks - JACKET_CLICKS) / (SEW_TOTAL - JACKET_CLICKS) : 0;
+            document.getElementById('sew-jacket-img').style.clipPath = `inset(0 0 ${Math.round((1 - jacketReveal) * 100)}% 0)`;
+            document.getElementById('sew-trousers-img').style.clipPath = `inset(0 0 ${Math.round((1 - trousersReveal) * 100)}% 0)`;
+
             document.getElementById('sew-msg').innerText = SEW_MESSAGES[sewClicks] || '';
 
             const btn = document.getElementById('sew-btn');
@@ -491,7 +575,7 @@
 
             if(sewClicks >= SEW_TOTAL) {
                 btn.disabled = true;
-                setTimeout(() => next(4), 600);
+                setTimeout(() => next(4), 800);
             }
         }
 
@@ -527,8 +611,21 @@
             el.classList.remove('rejected');
             void el.offsetWidth;
             el.classList.add('rejected');
-            showToast(msg);
             setTimeout(() => el.classList.remove('rejected'), 500);
+            const invMsg = document.getElementById('inv-msg');
+            invMsg.innerHTML = `<span style="color:var(--red);font-size:9px;letter-spacing:2px;">[ FIELD INTELLIGENCE REPORT ]</span><br>${msg}`;
+            invMsg.classList.add('show');
+        }
+
+        function initInventoryScan() {
+            const invMsg = document.getElementById('inv-msg');
+            invMsg.innerHTML = `<span style="color:var(--gold);font-size:9px;letter-spacing:2px;">[ FIELD ANALYSIS ]</span><br>Scanning inventory for approved mission equipment...`;
+            invMsg.classList.add('show');
+            setTimeout(() => {
+                document.querySelectorAll('.inv-item.wrong').forEach(el => el.classList.add('suspicious'));
+                invMsg.innerHTML = `<span style="color:var(--red);font-size:9px;letter-spacing:2px;">[ WARNING ]</span><br>Unauthorized items detected in inventory. Select only verified mission equipment, Agent.`;
+            }, 1800);
+            setTimeout(() => { invMsg.classList.remove('show'); }, 5000);
         }
 
         function typewriter(el) {
