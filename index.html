@@ -116,6 +116,20 @@
         /* REJECTION FLASH (swatch already-rejected click) */
         @keyframes rejectFlash { 0%,100% { background: rgba(230,57,70,0.12); } 50% { background: rgba(230,57,70,0.38); } }
 
+        /* CIPHER COMBINATION LOCK */
+        .cipher-grid { background: #080808; border: 1px solid #333; border-radius: 4px; padding: 10px 6px; margin: 12px 0; }
+        .cipher-row { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #1a1a1a; flex-wrap: wrap; }
+        .cipher-row:last-child { border-bottom: none; }
+        .cem { font-size: 28px; line-height: 1; user-select: none; }
+        .cop { color: #aaa; font-size: 17px; font-family: 'Special Elite'; }
+        .ceq { color: var(--gold); font-size: 17px; font-family: 'Special Elite'; }
+        .cval { color: white; font-size: 20px; font-family: 'Special Elite'; font-weight: bold; min-width: 26px; text-align: left; }
+        .cipher-code-label { display: flex; justify-content: center; gap: 20px; margin: 16px 0 5px; font-size: 24px; user-select: none; }
+        .cipher-inputs { display: flex; justify-content: center; gap: 10px; margin: 4px 0 8px; }
+        .cipher-digit { width: 56px; height: 64px; background: #111; border: 2px solid var(--gold); color: var(--gold); text-align: center; font-size: 30px; font-family: 'Special Elite'; outline: none; border-radius: 2px; -webkit-appearance: none; appearance: none; }
+        .cipher-digit:focus { border-color: white; background: #1a1a1a; }
+        .cipher-digit.wrong { border-color: var(--red) !important; animation: cwShake 0.4s ease; }
+
         /* VIDEO STYLING */
         video { border: 2px solid var(--gold); background: #000; border-radius: 4px; }
     </style>
@@ -189,7 +203,37 @@
         <video id="transitionVideo" width="100%" playsinline controls>
             <source src="gemini_generated_video_B5915804.mp4" type="video/mp4">
         </video>
-        <button onclick="next(3)">ENTER TAILOR SHOP FACILITIES</button>
+        <button onclick="next(26)">ENTER TAILOR SHOP FACILITIES</button>
+    </div>
+
+    <div id="stage26" class="screen hidden">
+        <p class="mission-progress">STAGE 3 / 5 — ENTRY</p>
+        <h2>TAILOR SHOP — COMBINATION LOCK</h2>
+        <h1>Crack the Code</h1>
+        <p style="color:var(--gold); font-style:italic; margin-bottom:4px; font-size:12px;">"The shop requires a 4-digit combination.<br>Solve the equations to enter."</p>
+        <div class="cipher-grid">
+            <div class="cipher-row">
+                <span class="cem">✂️</span><span class="cop">+</span><span class="cem">🎩</span><span class="ceq">=</span><span class="cval">13</span>
+            </div>
+            <div class="cipher-row">
+                <span class="cem">🧥</span><span class="cop">×</span><span class="cem">✂️</span><span class="ceq">=</span><span class="cval">32</span>
+            </div>
+            <div class="cipher-row">
+                <span class="cem">🧥</span><span class="cop">−</span><span class="cem">✂️</span><span class="ceq">=</span><span class="cem">✂️</span>
+            </div>
+            <div class="cipher-row">
+                <span class="cem">🧥</span><span class="cop">×</span><span class="cem">🎩</span><span class="cop">+</span><span class="cem">🧵</span><span class="ceq">=</span><span class="cval">73</span>
+            </div>
+        </div>
+        <p style="font-size:11px; color:#666; font-family:'Special Elite'; letter-spacing:1px; margin:4px 0;">ENTER THE CODE &nbsp;🧵 &nbsp;🎩 &nbsp;🧥 &nbsp;✂️</p>
+        <div class="cipher-inputs">
+            <input type="text" inputmode="numeric" class="cipher-digit" id="cd1" maxlength="1" placeholder="?" autocomplete="off">
+            <input type="text" inputmode="numeric" class="cipher-digit" id="cd2" maxlength="1" placeholder="?" autocomplete="off">
+            <input type="text" inputmode="numeric" class="cipher-digit" id="cd3" maxlength="1" placeholder="?" autocomplete="off">
+            <input type="text" inputmode="numeric" class="cipher-digit" id="cd4" maxlength="1" placeholder="?" autocomplete="off">
+        </div>
+        <p id="cipher-error" style="color:var(--red); font-size:12px; min-height:18px; margin:4px 0; font-family:'Special Elite'; letter-spacing:1px;"></p>
+        <button onclick="checkCipherCode()">UNLOCK THE DOOR</button>
     </div>
 
     <div id="stage3" class="screen hidden">
@@ -273,6 +317,7 @@
             el.classList.add('fade-in');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if(n === 2 && !gridBuilt) buildGrid();
+            if(n === 26) initCipher();
             if(n === 3) {
                 swatchIdx = 0; renderSwatch();
                 sewClicks = 0;
@@ -628,6 +673,32 @@
             setTimeout(() => { invMsg.classList.remove('show'); }, 5000);
         }
 
+        function initCipher() {
+            document.querySelectorAll('.cipher-digit').forEach(el => {
+                el.value = '';
+                el.classList.remove('wrong');
+                el.style.borderColor = '';
+            });
+            document.getElementById('cipher-error').innerText = '';
+            setTimeout(() => document.getElementById('cd1').focus(), 350);
+        }
+
+        function checkCipherCode() {
+            const inputs = Array.from(document.querySelectorAll('.cipher-digit'));
+            const digits = inputs.map(i => i.value.trim());
+            const code = digits.join('');
+            if (code === '1984') {
+                document.getElementById('cipher-error').innerText = '';
+                showToast('CODE ACCEPTED. DOOR UNLOCKED.', true);
+                setTimeout(() => next(3), 1100);
+            } else {
+                inputs.forEach(i => { i.classList.remove('wrong'); void i.offsetWidth; i.classList.add('wrong'); });
+                setTimeout(() => inputs.forEach(i => i.classList.remove('wrong')), 500);
+                const msg = digits.some(d => d === '') ? 'INCOMPLETE CODE.' : 'INCORRECT CODE. ACCESS DENIED.';
+                document.getElementById('cipher-error').innerText = msg;
+            }
+        }
+
         function typewriter(el) {
             const text = el.innerText;
             el.innerText = '';
@@ -655,6 +726,19 @@
             void s1.offsetWidth;
             s1.classList.add('fade-in');
             typewriter(s1.querySelector('h1'));
+
+            // Cipher digit auto-advance & backspace
+            const cds = Array.from(document.querySelectorAll('.cipher-digit'));
+            cds.forEach((input, idx) => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+                    if (this.value.length === 1 && idx < cds.length - 1) cds[idx + 1].focus();
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && idx > 0) cds[idx - 1].focus();
+                    if (e.key === 'Enter') checkCipherCode();
+                });
+            });
         });
     </script>
 </body>
