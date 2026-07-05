@@ -225,7 +225,8 @@
                 <span class="cem">🧥</span><span class="cop">×</span><span class="cem">🎩</span><span class="cop">+</span><span class="cem">🧵</span><span class="ceq">=</span><span class="cval">73</span>
             </div>
         </div>
-        <p style="font-size:11px; color:#666; font-family:'Special Elite'; letter-spacing:1px; margin:4px 0;">ENTER THE CODE &nbsp;🧵 &nbsp;🎩 &nbsp;🧥 &nbsp;✂️</p>
+        <p style="font-size:14px; color:#999; font-family:'Special Elite'; letter-spacing:3px; margin:16px 0 6px;">ENTER THE CODE</p>
+        <div class="cipher-code-label">🧵 🎩 🧥 ✂️</div>
         <div class="cipher-inputs">
             <input type="text" inputmode="numeric" class="cipher-digit" id="cd1" maxlength="1" placeholder="?" autocomplete="off">
             <input type="text" inputmode="numeric" class="cipher-digit" id="cd2" maxlength="1" placeholder="?" autocomplete="off">
@@ -275,8 +276,9 @@
         <h1>Armor Alignment</h1>
         <div id="suit-up-stage">
             <img src="IMG_0151.png" id="char-body" alt="Character Base Body">
-            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:58%; left:20%; width:50%; height:auto;" alt="Trousers">
-            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:25%; left:17%; width:66%; height:auto;" alt="Jacket">
+            <img src="IMG_0155.png" id="fit-trousers" class="fitted" style="top:58%; left:26%; width:50%; height:auto;" alt="Trousers">
+            <img src="IMG_0154.png" id="fit-jacket" class="fitted" style="top:19%; left:17%; width:66%; height:auto;" alt="Jacket">
+            <img id="reject-overlay" src="" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;opacity:0;pointer-events:none;z-index:10;transition:opacity 0.15s;">
         </div>
         <div class="inventory">
             <img src="IMG_0155.png" class="inv-item" onclick="equip('trousers', this)" alt="Trousers Icon">
@@ -293,16 +295,11 @@
     <div id="stage5" class="screen hidden">
         <p class="mission-progress">STAGE 5 / 5 — MISSION COMPLETE</p>
         <h2>MISSION ACCOMPLISHED</h2>
-        <div id="pre-video">
-            <img src="IMG_6503.png" style="width: 100%; border: 1px solid var(--gold); margin-bottom: 10px;" alt="Exiting Shop">
-            <button onclick="playReveal()">PLAY FINAL TRANSMISSION</button>
-        </div>
-        <div id="video-container" class="hidden">
-            <video id="revealVideo" width="100%" playsinline controls>
-                <source src="gemini_generated_video_13E8BBF2.mp4" type="video/mp4">
-            </video>
-            <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">"THANK YOU GILLIAN AND WAYNE FOR THE INCREDIBLE GIFT!"</p>
-        </div>
+        <h1>Final Transmission</h1>
+        <video id="revealVideo" width="100%" playsinline controls>
+            <source src="gemini_generated_video_33706C2B.mp4" type="video/mp4">
+        </video>
+        <p style="font-family:'Special Elite'; margin-top:20px; color:var(--gold);">"THANK YOU GILLIAN AND WAYNE FOR THE INCREDIBLE GIFT!"</p>
     </div>
 
     <script>
@@ -337,6 +334,7 @@
                 document.getElementById('inv-msg').classList.remove('show');
                 setTimeout(initInventoryScan, 700);
             }
+            if(n === 5) { setTimeout(() => { const v = document.getElementById('revealVideo'); if(v) v.play().catch(()=>{}); }, 400); }
             const h1 = el.querySelector('h1');
             if(h1) typewriter(h1);
         }
@@ -653,13 +651,26 @@
         }
 
         function rejectItem(el, msg) {
-            el.classList.remove('rejected');
-            void el.offsetWidth;
-            el.classList.add('rejected');
-            setTimeout(() => el.classList.remove('rejected'), 500);
-            const invMsg = document.getElementById('inv-msg');
-            invMsg.innerHTML = `<span style="color:var(--red);font-size:9px;letter-spacing:2px;">[ FIELD INTELLIGENCE REPORT ]</span><br>${msg}`;
-            invMsg.classList.add('show');
+            // Flash the wrong item onto the character briefly
+            const overlay = document.getElementById('reject-overlay');
+            if (overlay) {
+                overlay.src = el.src;
+                overlay.style.opacity = '1';
+                setTimeout(() => { overlay.style.opacity = '0'; }, 650);
+            }
+            // Shake the inventory thumbnail after a short beat
+            setTimeout(() => {
+                el.classList.remove('rejected');
+                void el.offsetWidth;
+                el.classList.add('rejected');
+                setTimeout(() => el.classList.remove('rejected'), 500);
+            }, 200);
+            // Show rejection intel after the flash
+            setTimeout(() => {
+                const invMsg = document.getElementById('inv-msg');
+                invMsg.innerHTML = `<span style="color:var(--red);font-size:9px;letter-spacing:2px;">[ FIELD INTELLIGENCE REPORT ]</span><br>${msg}`;
+                invMsg.classList.add('show');
+            }, 400);
         }
 
         function initInventoryScan() {
@@ -712,12 +723,6 @@
                     el.classList.remove('typing');
                 }
             }, 50);
-        }
-
-        function playReveal() {
-            document.getElementById('pre-video').classList.add('hidden');
-            document.getElementById('video-container').classList.remove('hidden');
-            document.getElementById('revealVideo').play();
         }
 
         // Kick off typewriter + fade on the initial login screen
