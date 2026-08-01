@@ -1,0 +1,14 @@
+{
+  "name": "Pass & Play UNO Night",
+  "short_name": "UNO Night",
+  "description": "A pass-the-phone UNO-style card game for kids.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e0f16",
+  "theme_color": "#12131b",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

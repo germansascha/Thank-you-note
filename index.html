@@ -1,0 +1,1420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Pass &amp; Play UNO</title>
+<meta name="description" content="A pass-the-phone UNO-style card game for kids.">
+<meta name="theme-color" content="#12131b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UNO Night">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<style>
+/* ---------------------------------------------------------------- reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #0e0f16;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+button, input { font: inherit; color: inherit; border: 0; background: none; }
+button { cursor: pointer; touch-action: manipulation; }
+
+/* --------------------------------------------------------------- tokens */
+:root {
+  --red:    #e8483f;
+  --yellow: #f5b616;
+  --green:  #35b45c;
+  --blue:   #2f7de1;
+  --wild:   #6b7280;
+
+  --bg:     #0e0f16;
+  --panel:  #1b1d29;
+  --panel2: #262939;
+  --ink:    #ffffff;
+  --dim:    #9aa0b5;
+
+  --pad-t: env(safe-area-inset-top, 0px);
+  --pad-b: env(safe-area-inset-bottom, 0px);
+  --pad-l: env(safe-area-inset-left, 0px);
+  --pad-r: env(safe-area-inset-right, 0px);
+
+  --cw: 84px;               /* hand card width, set by JS */
+  --topbar-h: 88px;         /* measured at runtime */
+}
+.c-red    { --c: var(--red);    --cd: #b6322b; }
+.c-yellow { --c: var(--yellow); --cd: #c08c07; }
+.c-green  { --c: var(--green);  --cd: #248441; }
+.c-blue   { --c: var(--blue);   --cd: #205aa4; }
+.c-wild   { --c: var(--wild);   --cd: #3d4250; }
+
+/* ----------------------------------------------------------- app layout */
+/* NOTE: `absolute` (not `fixed`) on purpose — a fixed element would open its own
+   stacking context and trap #topbar's z-index below the overlay screens. */
+#app {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--pad-t) var(--pad-r) var(--pad-b) var(--pad-l);
+  background:
+    radial-gradient(120% 70% at 50% 0%,  #1e2133 0%, transparent 60%),
+    radial-gradient(120% 60% at 50% 100%, #1a1c2b 0%, transparent 60%),
+    var(--bg);
+}
+
+/* -------------------------------------------------------------- topbar */
+#topbar {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 8px;
+  background: linear-gradient(#12131d 70%, rgba(18,19,29,0));
+}
+#players {
+  flex: 1;
+  display: flex;
+  gap: 5px;
+  padding-bottom: 2px;
+}
+
+/* Chips share the bar evenly and shrink as players are added, so every card
+   count stays on screen at six players — never scrolled out of sight. */
+.pchip {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 96px;
+  overflow: hidden;
+  padding: 6px 4px 7px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 2px solid transparent;
+  text-align: center;
+  transition: transform .2s, border-color .2s, background .2s;
+}
+.pchip.turn {
+  border-color: #fff;
+  background: var(--panel2);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.08);
+}
+.pchip .av { font-size: 20px; line-height: 1.1; }
+.pchip .nm {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dim);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 1px auto 2px;
+}
+.pchip.turn .nm { color: #fff; }
+.pchip .cnt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.pchip .cnt .mini {
+  display: flex;
+  gap: 1px;
+}
+.pchip .cnt .mini i {
+  width: 3px;
+  height: 11px;
+  border-radius: 1px;
+  background: #6f7691;
+  display: block;
+}
+.pchip.turn .cnt .mini i { background: #cfd5ea; }
+.pchip.uno {
+  border-color: var(--yellow);
+  animation: unoPulse .9s ease-in-out infinite;
+}
+.pchip.uno .cnt { color: var(--yellow); }
+@keyframes unoPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,182,22,.55); }
+  50%     { box-shadow: 0 0 0 7px rgba(245,182,22,0); }
+}
+
+#menuBtn {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--panel);
+  font-size: 17px;
+  color: var(--dim);
+}
+
+/* --------------------------------------------------------------- table */
+#table {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 12px;
+}
+#colorBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 6px;
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dim);
+}
+#colorBanner .dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--c, #666);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.12);
+}
+#piles {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.pileLabel {
+  margin-top: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  text-align: center;
+}
+#drawPile, #discardPile { text-align: center; }
+
+#toast {
+  min-height: 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #cfd5ea;
+  text-align: center;
+  padding: 0 10px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .25s, transform .25s;
+}
+#toast.show { opacity: 1; transform: none; }
+
+/* ---------------------------------------------------------------- card */
+.card {
+  position: relative;
+  width: var(--w, var(--cw));
+  height: calc(var(--w, var(--cw)) * 1.45);
+  border-radius: calc(var(--w, var(--cw)) * .14);
+  background: var(--c);
+  border: calc(var(--w, var(--cw)) * .05) solid #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.card::before {           /* the classic slanted white oval */
+  content: "";
+  position: absolute;
+  left: 4%; right: 4%; top: 9%; bottom: 9%;
+  border-radius: 50%;
+  background: #fff;
+  transform: rotate(-24deg) scale(1.04);
+}
+.card.wildFace { background: conic-gradient(var(--red) 0 25%, var(--yellow) 0 50%, var(--green) 0 75%, var(--blue) 0); }
+.card .glyph {
+  position: relative;
+  z-index: 2;
+  font-size: calc(var(--w, var(--cw)) * .52);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--c);
+  letter-spacing: -.03em;
+  text-shadow: 0 1px 0 rgba(0,0,0,.08);
+}
+.card.wildFace .glyph { color: #2a2d3a; }
+.card .glyph.sm { font-size: calc(var(--w, var(--cw)) * .38); }
+.card .rainbow {
+  position: relative;
+  z-index: 2;
+  width: calc(var(--w, var(--cw)) * .46);
+  height: calc(var(--w, var(--cw)) * .46);
+  border-radius: 50%;
+  background: conic-gradient(var(--red) 0 25%, var(--yellow) 0 50%, var(--green) 0 75%, var(--blue) 0);
+  box-shadow: 0 0 0 calc(var(--w, var(--cw)) * .035) #fff, 0 1px 3px rgba(0,0,0,.3);
+}
+.card .corner {
+  position: absolute;
+  z-index: 3;
+  font-size: calc(var(--w, var(--cw)) * .19);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+/* Deliberately NOT rotated 180° like a real playing card: an upside-down 9
+   reads as a 6, which is exactly the confusion a five-year-old doesn't need. */
+.card .corner.tl { top: 6%; left: 8%; }
+.card .corner.br { bottom: 6%; right: 8%; }
+.card.wildFace .corner { color: #fff; }
+
+/* 6 and 9 get the underline that real UNO cards use. */
+.card .glyph.ul { text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .04em; }
+
+.card.back {
+  background: #16182a;
+  border-color: #3a3f57;
+}
+.card.back::before { display: none; }
+.card.back .logo {
+  position: relative;
+  z-index: 2;
+  width: 78%;
+  height: 42%;
+  border-radius: 50%;
+  background: var(--yellow);
+  transform: rotate(-24deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--w, var(--cw)) * .2);
+  font-weight: 900;
+  color: #16182a;
+  letter-spacing: .04em;
+}
+
+/* hand cards */
+#hand .card { transition: transform .16s, opacity .16s, filter .16s; }
+#hand .card.playable { animation: bob 2.4s ease-in-out infinite; }
+#hand .card.playable::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 0 16px 2px rgba(255,255,255,.35);
+  pointer-events: none;
+}
+#hand .card.dead {
+  opacity: .42;
+  filter: grayscale(.5);
+  transform: scale(.94);
+  pointer-events: none;
+}
+#hand .card.playable:active { transform: translateY(-8px) scale(1.05); }
+@keyframes bob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+@keyframes pop {
+  0%   { transform: scale(.6) rotate(-12deg); opacity: 0; }
+  60%  { transform: scale(1.08) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+.popIn { animation: pop .34s cubic-bezier(.2,1.2,.3,1); }
+
+#drawPileBtn:active .card { transform: scale(.94); }
+
+/* ---------------------------------------------------------------- hand */
+/* A definite share of the screen, so the card-fitting maths below has a real
+   height to work with before anything is rendered. */
+#handWrap {
+  flex: 0 0 44%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+}
+#handLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+  padding: 2px 0 6px;
+}
+#hand {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 7px;
+  /* grow to fill #handWrap even while empty, so fitCardWidth() has a real
+     height to measure before any cards exist */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 2px 8px;
+}
+#hand::-webkit-scrollbar { display: none; }
+
+/* ----------------------------------------------------------- actionbar */
+#actionbar {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+  padding: 6px 12px 12px;
+}
+.btn {
+  flex: 1;
+  min-height: 60px;
+  border-radius: 18px;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--panel2);
+  color: #fff;
+  box-shadow: 0 4px 0 #14161f;
+  transition: transform .1s, box-shadow .1s;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #14161f; }
+.btn[disabled] { opacity: .32; box-shadow: none; pointer-events: none; }
+.btn.primary { background: linear-gradient(#3f8bff, #2f6fd6); box-shadow: 0 4px 0 #1d4a94; }
+.btn.go      { background: linear-gradient(#3ec46a, #2ba055); box-shadow: 0 4px 0 #1d6f3b; }
+.btn.warm    { background: linear-gradient(#f7bd2c, #dd9c08); color: #241c00; box-shadow: 0 4px 0 #9a6d00; }
+
+/* -------------------------------------------------------------- screens */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  padding: calc(var(--pad-t) + 8px) calc(var(--pad-r) + 16px) calc(var(--pad-b) + 16px) calc(var(--pad-l) + 16px);
+  background: #10111b;
+}
+.screen.on { display: flex; }
+.screen.top { z-index: 70; }
+/* .btn is flex:1 for the two side-by-side action buttons; inside a column
+   screen that would stretch it to fill the page. */
+.screen .btn { flex: 0 0 auto; }
+
+/* handoff */
+#handoff {
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  background:
+    radial-gradient(90% 55% at 50% 38%, var(--glow, #2a2e44) 0%, transparent 70%),
+    #10111b;
+}
+#handoff .pad { height: var(--topbar-h); flex: 0 0 auto; }   /* clears the topbar */
+#lastMove {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #b9c0d8;
+  line-height: 1.45;
+  max-width: 22em;
+}
+#handoffTop { display: flex; align-items: center; gap: 10px; }
+#handoffTop .lbl { font-size: 12px; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
+#passTo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dim);
+}
+#passName {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+#holdBtn {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+#holdRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(#fff calc(var(--p, 0) * 1%), rgba(255,255,255,.10) 0);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
+  mask: radial-gradient(circle, transparent 60%, #000 61%);
+}
+#holdInner {
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  background: var(--pc, #2b3048);
+  display: grid;
+  place-items: center;
+  font-size: 54px;
+  transition: transform .12s;
+}
+#holdBtn.holding #holdInner { transform: scale(.93); }
+#holdHint { font-size: 15px; font-weight: 800; color: #fff; }
+#holdSub  { font-size: 12.5px; color: var(--dim); margin-top: -8px; }
+
+/* color picker */
+#colorPick {
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: rgba(10,11,18,.94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+#colorPick h2 { font-size: 22px; font-weight: 900; }
+#colorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: min(320px, 84vw);
+}
+.colorBtn {
+  aspect-ratio: 1;
+  border-radius: 24px;
+  background: var(--c);
+  box-shadow: 0 6px 0 var(--cd);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.35);
+  transition: transform .1s, box-shadow .1s;
+}
+.colorBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--cd); }
+
+/* setup */
+#setup { gap: 12px; overflow-y: auto; }
+#setup h1 {
+  font-size: 27px;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.15;
+  margin-top: 4px;
+}
+#setup .sub { font-size: 13.5px; color: var(--dim); text-align: center; margin-top: -6px; }
+#rows { display: flex; flex-direction: column; gap: 9px; }
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 8px 10px;
+  border-left: 5px solid var(--c, #444);
+}
+.row .avBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--panel2);
+  font-size: 27px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 8px 4px;
+  border-bottom: 2px solid #3a3f57;
+  background: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.row input:focus { outline: none; border-bottom-color: #fff; }
+.row .del {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--dim);
+  font-size: 19px;
+  flex: 0 0 auto;
+}
+#addRow {
+  min-height: 50px;
+  border-radius: 16px;
+  background: var(--panel);
+  color: #b9c0d8;
+  font-size: 15px;
+  font-weight: 800;
+  width: 100%;
+}
+#setupFoot { margin-top: auto; padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+#tip { font-size: 11.5px; color: #6f7691; text-align: center; line-height: 1.5; }
+
+/* game over */
+#over { align-items: center; justify-content: center; gap: 14px; text-align: center; }
+#over .trophy { font-size: 74px; animation: bob 2s ease-in-out infinite; }
+#over h2 { font-size: 29px; font-weight: 900; }
+#over .who { font-size: 19px; font-weight: 700; color: var(--yellow); }
+#standings { display: flex; flex-direction: column; gap: 6px; width: min(330px, 86vw); margin-top: 4px; }
+.stand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+.stand .n { margin-left: auto; color: var(--dim); font-size: 13px; }
+
+/* menu sheet */
+#menu {
+  z-index: 90;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  background: rgba(8,9,14,.9);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+#menu .btn { width: min(340px, 88vw); flex: 0 0 auto; }
+
+#confetti { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
+
+/* big UNO shout */
+#shout {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+}
+#shout.on { animation: shout 1.25s ease-out; }
+#shout span {
+  font-size: 78px;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  color: var(--yellow);
+  text-shadow: 0 6px 0 #a3720a, 0 12px 30px rgba(0,0,0,.6);
+  transform: rotate(-8deg);
+}
+@keyframes shout {
+  0%   { opacity: 0; transform: scale(.4); }
+  25%  { opacity: 1; transform: scale(1.12); }
+  70%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+@media (max-height: 700px) {
+  #holdBtn { width: 158px; height: 158px; }
+  #holdInner { width: 98px; height: 98px; font-size: 44px; }
+  #passName { font-size: 26px; }
+  .btn { min-height: 54px; font-size: 16.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div id="players"></div>
+    <button id="menuBtn" aria-label="Menu">⋯</button>
+  </div>
+
+  <div id="table">
+    <div id="colorBanner"><span class="dot"></span><span id="colorText">Colour</span></div>
+    <div id="piles">
+      <button id="drawPileBtn">
+        <div id="drawPile"></div>
+        <div class="pileLabel" id="drawCount">Draw</div>
+      </button>
+      <div>
+        <div id="discardPile"></div>
+        <div class="pileLabel">On the pile</div>
+      </div>
+    </div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="handWrap">
+    <div id="handLabel">Your cards</div>
+    <div id="hand"></div>
+  </div>
+
+  <div id="actionbar">
+    <button class="btn primary" id="drawBtn">🫳 Take a card</button>
+    <button class="btn go" id="passBtn">Pass phone ➡️</button>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------------ handoff -->
+<div class="screen" id="handoff">
+  <div class="pad"></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;width:100%">
+    <div id="lastMove"></div>
+    <div id="handoffTop">
+      <div class="lbl">On the pile</div>
+      <div id="handoffCard"></div>
+    </div>
+    <div>
+      <div id="passTo">Pass the phone to</div>
+      <div id="passName">—</div>
+    </div>
+    <button id="holdBtn">
+      <div id="holdRing"></div>
+      <div id="holdInner">🙂</div>
+    </button>
+    <div id="holdHint">Hold the button to see your cards</div>
+    <div id="holdSub">Only you will see them 🤫</div>
+  </div>
+</div>
+
+<!-- -------------------------------------------------------- colour pick -->
+<div class="screen" id="colorPick">
+  <h2>Pick a colour!</h2>
+  <div id="colorGrid">
+    <button class="colorBtn c-red"    data-c="red">Red</button>
+    <button class="colorBtn c-yellow" data-c="yellow">Yellow</button>
+    <button class="colorBtn c-green"  data-c="green">Green</button>
+    <button class="colorBtn c-blue"   data-c="blue">Blue</button>
+  </div>
+</div>
+
+<!-- -------------------------------------------------------------- setup -->
+<div class="screen top on" id="setup">
+  <h1>🎴 Pass &amp; Play<br>UNO Night</h1>
+  <div class="sub">Tap a face to change it. Then press Start!</div>
+  <div id="rows"></div>
+  <button id="addRow">＋ Add a player</button>
+  <div id="setupFoot">
+    <button class="btn go" id="startBtn" style="min-height:64px">▶︎ Start the game</button>
+    <div id="tip">Pass the phone around the table. Nobody sees your cards<br>until <b>you</b> hold the button. 🤫</div>
+  </div>
+</div>
+
+<!-- ---------------------------------------------------------- game over -->
+<div class="screen top" id="over">
+  <div class="trophy">🏆</div>
+  <h2>We have a winner!</h2>
+  <div class="who" id="winnerName">—</div>
+  <div id="standings"></div>
+  <button class="btn go" id="againBtn" style="min-height:60px;width:min(330px,86vw);margin-top:8px">🔁 Play again</button>
+  <button class="btn" id="newPlayersBtn" style="min-height:50px;width:min(330px,86vw);font-size:15px">👥 Change players</button>
+</div>
+
+<!-- --------------------------------------------------------------- menu -->
+<div class="screen" id="menu">
+  <button class="btn" id="soundBtn">🔊 Sound: on</button>
+  <button class="btn warm" id="restartBtn">🔁 Start a new game</button>
+  <button class="btn" id="peopleBtn">👥 Change players</button>
+  <button class="btn primary" id="closeMenuBtn" style="margin-bottom:4px">↩︎ Back to the game</button>
+</div>
+
+<div id="shout"><span>UNO!</span></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   Pass & Play UNO — a hot-seat card game for one phone.
+   No build step, no dependencies: this file is the whole game.
+   ===================================================================== */
+
+const COLORS = ["red", "yellow", "green", "blue"];
+const COLOR_NAMES = { red: "Red", yellow: "Yellow", green: "Green", blue: "Blue" };
+const AVATARS = ["🦊","🐼","🐸","🦁","🐙","🦄","🐵","🐝","🐨","🦖","🐧","🐢","🦋","🐬","🦉","👾"];
+
+/* ------------------------------------------------------------- helpers */
+const $  = (sel) => document.querySelector(sel);
+const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* --------------------------------------------------------------- sound */
+const sound = {
+  on: true,
+  ctx: null,
+  wake() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+  },
+  tone(freq, dur = 0.12, type = "sine", vol = 0.14, delay = 0) {
+    if (!this.on || !this.ctx) return;
+    const t = this.ctx.currentTime + delay;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain).connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  },
+  play()  { this.tone(660, 0.11, "triangle"); this.tone(990, 0.09, "triangle", 0.09, 0.05); },
+  draw()  { this.tone(240, 0.14, "sine", 0.12); },
+  bad()   { this.tone(160, 0.22, "sawtooth", 0.09); },
+  reveal(){ this.tone(520, 0.09, "sine", 0.10); this.tone(780, 0.12, "sine", 0.10, 0.07); },
+  uno()   { this.tone(880, 0.14, "square", 0.10); this.tone(1170, 0.20, "square", 0.10, 0.13); },
+  win()   { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.3, "triangle", 0.13, i * 0.12)); }
+};
+function buzz(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+/* ---------------------------------------------------------------- deck */
+let nextId = 0;
+function buildDeck() {
+  const deck = [];
+  for (const color of COLORS) {
+    deck.push({ id: nextId++, color, value: 0 });
+    for (let n = 1; n <= 9; n++) {
+      deck.push({ id: nextId++, color, value: n });
+      deck.push({ id: nextId++, color, value: n });
+    }
+    for (const a of ["skip", "reverse", "draw2"]) {
+      deck.push({ id: nextId++, color, value: a });
+      deck.push({ id: nextId++, color, value: a });
+    }
+  }
+  for (let i = 0; i < 4; i++) {
+    deck.push({ id: nextId++, color: "wild", value: "wild" });
+    deck.push({ id: nextId++, color: "wild", value: "wild4" });
+  }
+  return shuffle(deck);
+}
+
+const isAction = (c) => typeof c.value === "string";
+function cardWords(card) {
+  const color = card.color === "wild" ? "" : COLOR_NAMES[card.color] + " ";
+  switch (card.value) {
+    case "skip":    return color + "Skip";
+    case "reverse": return color + "Reverse";
+    case "draw2":   return color + "Take 2";
+    case "wild":    return "Rainbow Wild";
+    case "wild4":   return "Wild Take 4";
+    default:        return color + card.value;
+  }
+}
+
+/* --------------------------------------------------------------- state */
+let G = null;                 // the live game
+let setupPlayers = [];        // roster being edited on the setup screen
+let holdTimer = null;
+
+function newGame(roster) {
+  const deck = buildDeck();
+  const players = roster.map((p, i) => ({
+    name: (p.name || "").trim() || "Player " + (i + 1),
+    emoji: p.emoji,
+    hand: deck.splice(0, 7)
+  }));
+
+  // Start with a plain number card so the first turn has no surprise rules.
+  let starter;
+  for (let i = 0; i < deck.length; i++) {
+    if (!isAction(deck[i]) && deck[i].color !== "wild") { starter = deck.splice(i, 1)[0]; break; }
+  }
+
+  G = {
+    players,
+    deck,
+    discard: [starter],
+    current: 0,
+    dir: 1,
+    activeColor: starter.color,
+    phase: "handoff",
+    hasDrawn: false,
+    drawnCard: null,
+    lastMove: "New game! " + players[0].emoji + " " + players[0].name + " starts.",
+    winner: null
+  };
+}
+
+const topCard = () => G.discard[G.discard.length - 1];   // NB: `top` is taken by window.top
+const me      = () => G.players[G.current];
+const nextIdx = (from = G.current) => (from + G.dir + G.players.length) % G.players.length;
+
+function playable(card) {
+  return card.color === "wild" || card.color === G.activeColor || card.value === topCard().value;
+}
+const canMove = () => me().hand.some(playable);
+
+function drawOne() {
+  if (!G.deck.length) {
+    // Recycle everything except the visible top card.
+    const keep = G.discard.pop();
+    G.deck = shuffle(G.discard.splice(0));
+    G.discard = [keep];
+    if (!G.deck.length) return null;         // absurdly unlikely, but don't crash
+  }
+  return G.deck.pop();
+}
+function drawInto(player, n) {
+  for (let i = 0; i < n; i++) {
+    const c = drawOne();
+    if (c) player.hand.push(c);
+  }
+}
+
+/* ------------------------------------------------------------ rendering */
+function cardNode(card, opts = {}) {
+  const n = el("div", "card c-" + card.color);
+  if (opts.width) n.style.setProperty("--w", opts.width + "px");
+
+  if (card.color === "wild") n.classList.add("wildFace");
+
+  const glyph = el("div", "glyph");
+  if (card.value === "wild") {
+    n.appendChild(el("div", "rainbow"));
+  } else {
+    glyph.textContent = ({ skip: "⊘", reverse: "⇄", draw2: "+2", wild4: "+4" })[card.value] ?? card.value;
+    if (isAction(card)) glyph.classList.add("sm");
+    if (card.value === 6 || card.value === 9) glyph.classList.add("ul");
+    n.appendChild(glyph);
+  }
+
+  const short = ({ skip: "⊘", reverse: "⇄", draw2: "+2", wild: "★", wild4: "+4" })[card.value] ?? card.value;
+  const tl = el("div", "corner tl"); tl.textContent = short;
+  const br = el("div", "corner br"); br.textContent = short;
+  n.append(tl, br);
+  return n;
+}
+
+function backNode(width) {
+  const n = el("div", "card back");
+  if (width) n.style.setProperty("--w", width + "px");
+  const logo = el("div", "logo");
+  logo.textContent = "UNO";
+  n.appendChild(logo);
+  return n;
+}
+
+function renderPlayers() {
+  const wrap = $("#players");
+  wrap.innerHTML = "";
+  G.players.forEach((p, i) => {
+    const chip = el("div", "pchip");
+    if (i === G.current) chip.classList.add("turn");
+    if (p.hand.length === 1) chip.classList.add("uno");
+
+    const av = el("div", "av"); av.textContent = p.emoji;
+    const nm = el("div", "nm"); nm.textContent = p.name;
+
+    const cnt = el("div", "cnt");
+    cnt.append(document.createTextNode(String(p.hand.length)));
+    const mini = el("div", "mini");
+    for (let k = 0; k < Math.min(p.hand.length, 6); k++) mini.appendChild(el("i"));
+    cnt.appendChild(mini);
+
+    chip.append(av, nm, cnt);
+    wrap.appendChild(chip);
+  });
+}
+
+function renderTable() {
+  const banner = $("#colorBanner");
+  banner.className = "c-" + G.activeColor;
+  $("#colorText").textContent = COLOR_NAMES[G.activeColor] + " is the colour";
+
+  const dis = $("#discardPile");
+  dis.innerHTML = "";
+  const dc = cardNode(topCard(), { width: 80 });
+  dc.classList.add("popIn");
+  dis.appendChild(dc);
+
+  const dp = $("#drawPile");
+  dp.innerHTML = "";
+  dp.appendChild(backNode(80));
+  $("#drawCount").textContent = G.deck.length + " left";
+}
+
+/* Pick the biggest card width that still lets the whole hand sit on screen
+   without scrolling — a child should never have to scroll to find a card. */
+function fitCardWidth(n) {
+  const wrap = $("#hand");
+  const GAP = 7;
+  const availW = wrap.clientWidth - 4;
+  const availH = wrap.clientHeight - 14;
+  if (availW <= 0 || availH <= 0) return 82;               // not laid out yet
+  for (const w of [90, 82, 74, 66, 58, 50, 44, 40]) {
+    const perRow = Math.max(1, Math.floor((availW + GAP) / (w + GAP)));
+    const rows = Math.ceil(n / perRow);
+    if (rows * (w * 1.45 + GAP) - GAP <= availH) return w;
+  }
+  return 40;                                               // absurd hand: it scrolls
+}
+
+function renderHand() {
+  const hand = me().hand;
+  const wrap = $("#hand");
+  wrap.innerHTML = "";
+
+  document.documentElement.style.setProperty("--cw", fitCardWidth(hand.length) + "px");
+
+  // Sort by colour then value so a small child can find things again.
+  const order = { red: 0, yellow: 1, green: 2, blue: 3, wild: 4 };
+  const sorted = hand.slice().sort((a, b) =>
+    order[a.color] - order[b.color] || String(a.value).localeCompare(String(b.value), undefined, { numeric: true })
+  );
+
+  for (const card of sorted) {
+    const node = cardNode(card);
+    const ok = playable(card);
+    node.classList.add(ok ? "playable" : "dead");
+    if (ok) node.addEventListener("click", () => tryPlay(card));
+    wrap.appendChild(node);
+  }
+
+  const n = hand.length;
+  $("#handLabel").textContent = me().emoji + " " + me().name + " — " + n + (n === 1 ? " card" : " cards");
+}
+
+function renderActions() {
+  const drawBtn = $("#drawBtn");
+  const passBtn = $("#passBtn");
+
+  if (!G.hasDrawn) {
+    drawBtn.style.display = "";
+    passBtn.style.display = "none";
+  } else {
+    drawBtn.style.display = "none";
+    passBtn.style.display = "";
+  }
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+}
+
+function render() {
+  renderPlayers();
+  if (!G) return;
+  if (G.phase === "play") {
+    renderTable();
+    renderHand();
+    renderActions();
+  }
+}
+
+/* ----------------------------------------------------------- turn flow */
+function tryPlay(card) {
+  if (G.phase !== "play" || !playable(card)) return;
+  sound.wake();
+
+  if (card.color === "wild") {
+    G.pendingWild = card;
+    show("#colorPick");
+    return;
+  }
+  commitPlay(card, card.color);
+}
+
+function commitPlay(card, color) {
+  const player = me();
+  const at = player.hand.findIndex((c) => c.id === card.id);
+  if (at === -1) return;
+  player.hand.splice(at, 1);
+  G.discard.push(card);
+  G.activeColor = color;
+
+  sound.play();
+  buzz(12);
+
+  let note = player.emoji + " " + player.name + " played " + cardWords(card) + ".";
+
+  if (player.hand.length === 0) {
+    G.winner = player;
+    G.phase = "over";
+    sound.win();
+    showWin();
+    return;
+  }
+
+  if (player.hand.length === 1) {
+    sound.uno();
+    const s = $("#shout");
+    s.classList.remove("on");
+    void s.offsetWidth;
+    s.classList.add("on");
+    note += " UNO! 🎉";
+  }
+
+  // Resolve the card's effect, then work out who is up next.
+  let skip = false;
+  if (card.value === "reverse") {
+    if (G.players.length === 2) {
+      skip = true;                              // heads-up: reverse behaves like a skip
+      note += " " + player.name + " goes again!";
+    } else {
+      G.dir *= -1;
+      note += " Now we go the other way around! ⇄";
+    }
+  } else if (card.value === "skip") {
+    skip = true;
+    note += " " + G.players[nextIdx()].name + " misses a turn. ⊘";
+  } else if (card.value === "draw2" || card.value === "wild4") {
+    const n = card.value === "draw2" ? 2 : 4;
+    const victim = G.players[nextIdx()];
+    drawInto(victim, n);
+    skip = true;
+    note += " " + victim.emoji + " " + victim.name + " takes " + n + " cards!";
+  }
+  if (card.color === "wild") note += " Colour is now " + COLOR_NAMES[color] + ".";
+
+  let who = nextIdx();
+  if (skip) who = (who + G.dir + G.players.length) % G.players.length;
+  G.current = who;
+
+  endTurn(note);
+}
+
+function doDraw() {
+  if (G.phase !== "play" || G.hasDrawn) return;
+  sound.wake();
+  const c = drawOne();
+  if (!c) {                                  // no cards anywhere: skip on rather than stall
+    const note = me().name + " could not draw — no cards left!";
+    G.current = nextIdx();
+    endTurn(note);
+    return;
+  }
+  me().hand.push(c);
+  G.hasDrawn = true;
+  G.drawnCard = c;
+  sound.draw();
+  buzz(10);
+  render();
+  if (playable(c)) toast("You drew " + cardWords(c) + " — you can play it! ✨");
+  else { sound.bad(); toast("You drew " + cardWords(c) + ". No match — pass the phone."); }
+}
+
+function passTurn() {
+  if (G.phase !== "play") return;
+  const note = me().emoji + " " + me().name + " took a card.";
+  G.current = nextIdx();
+  endTurn(note);
+}
+
+function endTurn(note) {
+  G.lastMove = note;
+  G.hasDrawn = false;
+  G.drawnCard = null;
+  G.phase = "handoff";
+  $("#toast").classList.remove("show");
+  renderPlayers();
+  showHandoff();
+}
+
+/* -------------------------------------------------------------- screens */
+function hideAll() { document.querySelectorAll(".screen").forEach((s) => s.classList.remove("on")); }
+function show(sel) { $(sel).classList.add("on"); }
+
+function showHandoff() {
+  const p = me();
+  // Belt and braces: the overlay hides the hand, but don't leave it in the DOM
+  // at all while the phone is changing hands.
+  $("#hand").innerHTML = "";
+  $("#handLabel").textContent = "";
+  $("#lastMove").textContent = G.lastMove;
+  $("#passName").textContent = p.emoji + " " + p.name;
+  $("#holdInner").textContent = p.emoji;
+  $("#holdHint").textContent = "Hold to see your cards";
+  $("#holdSub").textContent = "Only " + p.name + " should look! 🤫";
+
+  const hc = $("#handoffCard");
+  hc.innerHTML = "";
+  hc.appendChild(cardNode(topCard(), { width: 46 }));
+
+  const colorVal = getComputedStyle(document.documentElement).getPropertyValue("--" + G.activeColor).trim();
+  $("#handoff").style.setProperty("--glow", colorVal + "44");
+  $("#holdInner").style.setProperty("--pc", colorVal);
+  $("#holdRing").style.setProperty("--p", 0);
+
+  hideAll();
+  show("#handoff");
+}
+
+function revealHand() {
+  G.phase = "play";
+  sound.reveal();
+  buzz(18);
+  hideAll();
+  render();
+  toast(canMove() ? "Tap a glowing card to play it!" : "Nothing matches — take a card 🫳");
+}
+
+function showWin() {
+  hideAll();
+  $("#winnerName").textContent = G.winner.emoji + " " + G.winner.name + " wins!";
+  const list = $("#standings");
+  list.innerHTML = "";
+  G.players.slice()
+    .sort((a, b) => a.hand.length - b.hand.length)
+    .forEach((p) => {
+      const row = el("div", "stand");
+      row.innerHTML = "<span style='font-size:19px'>" + p.emoji + "</span><span></span>";
+      row.children[1].textContent = p.name;
+      const n = el("span", "n");
+      n.textContent = p.hand.length + (p.hand.length === 1 ? " card left" : " cards left");
+      row.appendChild(n);
+      list.appendChild(row);
+    });
+  renderPlayers();
+  show("#over");
+  confetti();
+}
+
+/* ---------------------------------------------------------------- setup */
+function renderSetup() {
+  const rows = $("#rows");
+  rows.innerHTML = "";
+  setupPlayers.forEach((p, i) => {
+    const row = el("div", "row");
+    row.classList.add("c-" + COLORS[i % 4]);
+
+    const av = el("button", "avBtn");
+    av.textContent = p.emoji;
+    av.addEventListener("click", () => {
+      sound.wake();
+      let k = (AVATARS.indexOf(p.emoji) + 1) % AVATARS.length;
+      while (setupPlayers.some((q) => q !== p && q.emoji === AVATARS[k])) k = (k + 1) % AVATARS.length;
+      p.emoji = AVATARS[k];
+      av.textContent = p.emoji;
+      sound.tone(500 + k * 20, 0.07, "triangle", 0.09);
+    });
+
+    const input = el("input");
+    input.type = "text";
+    input.value = p.name;
+    input.placeholder = "Player " + (i + 1);
+    input.maxLength = 12;
+    input.autocomplete = "off";
+    input.addEventListener("input", () => { p.name = input.value; });
+
+    row.append(av, input);
+
+    if (setupPlayers.length > 2) {
+      const del = el("button", "del");
+      del.textContent = "✕";
+      del.setAttribute("aria-label", "Remove player");
+      del.addEventListener("click", () => { setupPlayers.splice(i, 1); renderSetup(); });
+      row.appendChild(del);
+    }
+    rows.appendChild(row);
+  });
+  $("#addRow").style.display = setupPlayers.length >= 6 ? "none" : "";
+}
+
+function seedSetup() {
+  setupPlayers = [
+    { name: "", emoji: AVATARS[0] },
+    { name: "", emoji: AVATARS[1] },
+    { name: "", emoji: AVATARS[2] }
+  ];
+  renderSetup();
+}
+
+/* ------------------------------------------------------------- confetti */
+function confetti() {
+  const cvs = $("#confetti");
+  const ctx = cvs.getContext("2d");
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cvs.width = innerWidth * dpr;
+  cvs.height = innerHeight * dpr;
+  ctx.scale(dpr, dpr);
+
+  const palette = ["#e8483f", "#f5b616", "#35b45c", "#2f7de1", "#ffffff"];
+  const bits = Array.from({ length: 130 }, () => ({
+    x: Math.random() * innerWidth,
+    y: -20 - Math.random() * innerHeight * 0.6,
+    w: 6 + Math.random() * 7,
+    h: 9 + Math.random() * 10,
+    vy: 1.8 + Math.random() * 3,
+    vx: -1 + Math.random() * 2,
+    rot: Math.random() * Math.PI,
+    vr: -0.15 + Math.random() * 0.3,
+    col: palette[(Math.random() * palette.length) | 0]
+  }));
+
+  const started = performance.now();
+  (function frame(now) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const b of bits) {
+      b.x += b.vx; b.y += b.vy; b.rot += b.vr;
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.rot);
+      ctx.fillStyle = b.col;
+      ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      ctx.restore();
+    }
+    if (now - started < 5200) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, innerWidth, innerHeight);
+  })(started);
+}
+
+/* --------------------------------------------------------------- events */
+// Hold-to-reveal: stops the phone showing a hand while it is still mid-air.
+(function wireHold() {
+  const btn = $("#holdBtn");
+  const ring = $("#holdRing");
+  const DURATION = 550;
+  let raf = null, start = 0;
+
+  function begin(e) {
+    e.preventDefault();
+    sound.wake();
+    // Capture the pointer so a wobbly finger sliding off the button doesn't
+    // cancel the reveal half way through.
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    btn.classList.add("holding");
+    start = performance.now();
+    const step = (now) => {
+      const p = Math.min(100, ((now - start) / DURATION) * 100);
+      ring.style.setProperty("--p", p);
+      if (p >= 100) { cancel(); revealHand(); }
+      else raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+  function cancel() {
+    btn.classList.remove("holding");
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    ring.style.setProperty("--p", 0);
+  }
+  btn.addEventListener("pointerdown", begin);
+  btn.addEventListener("pointerup", cancel);
+  btn.addEventListener("pointercancel", cancel);
+  btn.addEventListener("contextmenu", (e) => e.preventDefault());
+})();
+
+$("#drawBtn").addEventListener("click", doDraw);
+$("#drawPileBtn").addEventListener("click", () => { if (!G.hasDrawn) doDraw(); });
+$("#passBtn").addEventListener("click", passTurn);
+
+document.querySelectorAll(".colorBtn").forEach((b) => {
+  b.addEventListener("click", () => {
+    const card = G.pendingWild;
+    G.pendingWild = null;
+    hideAll();
+    commitPlay(card, b.dataset.c);
+  });
+});
+
+$("#addRow").addEventListener("click", () => {
+  sound.wake();
+  const used = setupPlayers.map((p) => p.emoji);
+  const free = AVATARS.find((a) => !used.includes(a)) || AVATARS[0];
+  setupPlayers.push({ name: "", emoji: free });
+  renderSetup();
+});
+
+$("#startBtn").addEventListener("click", () => {
+  sound.wake();
+  if (document.activeElement) document.activeElement.blur();
+  newGame(setupPlayers);
+  renderPlayers();
+  showHandoff();
+});
+
+$("#againBtn").addEventListener("click", () => {
+  const roster = G.players.map((p) => ({ name: p.name, emoji: p.emoji }));
+  newGame(roster);
+  renderPlayers();
+  showHandoff();
+});
+
+$("#newPlayersBtn").addEventListener("click", () => {
+  hideAll();
+  show("#setup");
+});
+
+/* ----------------------------------------------------------------- menu */
+const closeMenu = () => $("#menu").classList.remove("on");
+
+$("#menuBtn").addEventListener("click", () => {
+  sound.wake();
+  $("#soundBtn").textContent = sound.on ? "🔊 Sound: on" : "🔇 Sound: off";
+  $("#menu").classList.add("on");
+});
+$("#closeMenuBtn").addEventListener("click", closeMenu);
+$("#soundBtn").addEventListener("click", () => {
+  sound.on = !sound.on;
+  $("#soundBtn").textContent = sound.on ? "🔊 Sound: on" : "🔇 Sound: off";
+  if (sound.on) sound.reveal();
+});
+$("#restartBtn").addEventListener("click", () => {
+  closeMenu();
+  if (!G) return;
+  newGame(G.players.map((p) => ({ name: p.name, emoji: p.emoji })));
+  renderPlayers();
+  showHandoff();
+});
+$("#peopleBtn").addEventListener("click", () => {
+  closeMenu();
+  hideAll();
+  show("#setup");
+});
+
+/* The hand-off screen sits below the always-visible scoreboard, so it needs to
+   know exactly how tall that scoreboard is. */
+function measureTopbar() {
+  const h = $("#topbar").getBoundingClientRect().height;
+  if (h) document.documentElement.style.setProperty("--topbar-h", h + "px");
+}
+if (window.ResizeObserver) new ResizeObserver(measureTopbar).observe($("#topbar"));
+
+// Keep the layout honest when Safari's toolbars slide in and out.
+addEventListener("resize", () => {
+  measureTopbar();
+  if (G && G.phase === "play") renderHand();
+});
+
+seedSetup();
+measureTopbar();
+</script>
+</body>
+</html>

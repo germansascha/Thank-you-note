@@ -1,0 +1,14 @@
+{
+  "name": "uno-pass-and-play",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A pass-the-phone UNO-style card game for kids.",
+  "scripts": {
+    "test": "node test.mjs",
+    "icon": "python3 make_icon.py",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
